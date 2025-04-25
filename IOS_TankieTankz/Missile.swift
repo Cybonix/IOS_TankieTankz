@@ -10,7 +10,7 @@ import SpriteKit
 class Missile: SKNode {
     let targetTank: EnemyTank
     let biomeType: BiomeType
-    let speed: CGFloat = 8.0
+    let missileSpeed: CGFloat = 8.0
     private var size: CGFloat = 10.0
     private var angle: CGFloat = 0.0
     private var smokeTrail: [SmokeParticle] = []
@@ -226,8 +226,8 @@ class Missile: SKNode {
         zRotation = angle + CGFloat.pi / 2 // Add 90 degrees because missile sprite is oriented upward
         
         // Move missile towards target
-        position.x += cos(angle) * speed
-        position.y += sin(angle) * speed
+        position.x += cos(angle) * missileSpeed
+        position.y += sin(angle) * missileSpeed
         
         // Check if missile has reached its target
         let distanceSquared = dx * dx + dy * dy
