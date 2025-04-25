@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import Foundation
 
 class Missile: SKNode {
     let targetTank: EnemyTank

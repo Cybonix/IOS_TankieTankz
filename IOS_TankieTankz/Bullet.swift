@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import Foundation
 
 class Bullet: SKShapeNode {
     let direction: Direction

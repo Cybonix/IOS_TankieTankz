@@ -24,6 +24,7 @@ struct PhysicsCategory {
     static let enemyTank: UInt32 = 0x1 << 3
     static let enemyBullet: UInt32 = 0x1 << 4
     static let powerUp: UInt32 = 0x1 << 5
+    static let wall: UInt32 = 0x1 << 6
 }
 
 // Game constants

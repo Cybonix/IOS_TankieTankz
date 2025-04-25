@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import Foundation
 
 class EnemyTank: BaseTank {
     var isBoss: Bool = false
@@ -71,14 +72,4 @@ class EnemyTank: BaseTank {
     }
 }
 
-// Physics categories will be defined centrally
-struct PhysicsCategory {
-    static let none: UInt32 = 0
-    static let playerTank: UInt32 = 0x1 << 0
-    static let enemyTank: UInt32 = 0x1 << 1
-    static let playerBullet: UInt32 = 0x1 << 2
-    static let enemyBullet: UInt32 = 0x1 << 3
-    static let playerMissile: UInt32 = 0x1 << 4
-    static let wall: UInt32 = 0x1 << 5
-    static let powerUp: UInt32 = 0x1 << 6
-}
+// PhysicsCategory is now defined in Constants.swift
