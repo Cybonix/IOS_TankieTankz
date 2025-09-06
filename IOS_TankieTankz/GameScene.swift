@@ -383,7 +383,8 @@ class GameScene: SKScene {
             newEnemyTank = EnemyTank(
                 position: CGPoint(x: randomX, y: size.height - 150),
                 direction: .down,
-                isBoss: false
+                isBoss: false,
+                bossType: .assault // Default value, not used for regular tanks
             )
         }
         
