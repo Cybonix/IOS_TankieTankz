@@ -31,14 +31,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    // MARK: UISceneSession Lifecycle (opt-out)
-    
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Return minimal configuration for scene support requirement
-        let config = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-        config.delegateClass = nil // No scene delegate
-        return config
-    }
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Pause the game when interrupted (e.g., phone call)
