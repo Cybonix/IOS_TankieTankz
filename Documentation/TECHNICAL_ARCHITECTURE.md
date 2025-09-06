@@ -40,6 +40,8 @@ private func getBulletSpawnPosition(tank:direction:)        // Bullet positionin
 **Role**: Tank rendering, physics, and behavior
 
 #### Key Features:
+- **Rotating Track System**: Tracks now rotate with tank direction (vertical for up/down, horizontal for left/right)
+- **Tank-to-Tank Collision**: Added collision detection between tanks to prevent overlap
 - **Wider Tank Design**: 1.3x width ratio for realistic appearance
 - **Performance Cached**: All dimensions calculated once and stored
 - **Smooth Animation**: 8-frame cycle with 3-frame intervals
@@ -48,10 +50,11 @@ private func getBulletSpawnPosition(tank:direction:)        // Bullet positionin
 #### Critical Methods:
 ```swift
 private func setupTankVisuals()                  // Tank rendering with proper proportions
-private func updateCannonPosition()              // Direction-aware cannon positioning [RECENT FIX]
+private func updateCannonPosition()              // Direction-aware cannon positioning
 private func updateWheelAnimation()              // Smooth track animation [OPTIMIZED]
-private func animateTracks()                     // Track movement with base position reset [RECENT FIX]
-private func setupPhysicsBody()                  // Collision detection setup
+private func updateTrackPositions()              // Rotating track system [NEW - CURRENT SESSION]
+private func animateTracks()                     // Track movement with base position reset
+private func setupPhysicsBody()                  // Enhanced collision detection with tank-to-tank [UPDATED]
 ```
 
 #### Cached Performance System:
@@ -124,8 +127,8 @@ PhysicsCategory Bitmasks:
 ### Collision Detection Matrix:
 | Entity | Tests Against | Collides With |
 |--------|---------------|---------------|
-| Player Tank | Enemy Bullets, Power-ups | Walls |
-| Enemy Tank | Player Bullets, Player Missiles | Walls |  
+| Player Tank | Enemy Bullets, Power-ups, Enemy Tanks | Walls, Enemy Tanks |
+| Enemy Tank | Player Bullets, Player Missiles, Other Enemy Tanks, Player Tank | Walls, Player Tank, Enemy Tanks |  
 | Player Bullet | Enemy Tanks | None |
 | Enemy Bullet | Player Tank | None |
 | Power-up | Player Tank | None |
@@ -154,12 +157,13 @@ PhysicsCategory Bitmasks:
    ├── tankBody (main rectangle, 1.3x width)
    ├── tankCannon (positioned by direction)  
    ├── corner details (4 small squares)
-   ├── leftTrack/rightTrack (vertical rectangles)
+   ├── leftTrack/rightTrack (rotating rectangles) [ENHANCED - CURRENT SESSION]
    └── wheels array (5 animated rectangles per side)
 
 2. Animation system updates:
    ├── Wheel positions (vertical oscillation)
-   ├── Track positions (slight horizontal/vertical offset)  
+   ├── Track rotation and positioning (vertical for up/down, horizontal for left/right) [NEW]
+   ├── Track offset (1.5% of tank size - very close to body) [IMPROVED]
    └── Cannon rotation (0°, 90°, 180°, 270°)
 ```
 
@@ -369,8 +373,94 @@ Levels 12:    Final boss (Volcanic)
 
 ---
 
+## 🚀 Major Enhancements - Current Session
+
+### Revolutionary Improvements Applied:
+
+1. **Rotating Tank Track System** 🔄 → ✅
+   - **File**: `BaseTank.swift:updateTrackPositions()`
+   - **Enhancement**: Tracks now rotate with tank direction (vertical for up/down, horizontal for left/right)
+   - **Visual Impact**: Realistic tank appearance with proper track orientation
+   - **Code**: Direction-based track positioning and rotation system
+
+2. **Tank-to-Tank Collision Detection** 🚗 → ✅
+   - **File**: `BaseTank.swift:setupPhysicsBody()` and `GameScene.swift:didBegin()`
+   - **Enhancement**: Added collision detection between all tanks to prevent overlap
+   - **Physics**: Player-enemy and enemy-enemy tank collision with realistic bouncing
+   - **Bitmasks**: Updated collision and contact test bitmasks for tank interactions
+
+3. **Professional UI Overhaul** 🎨 → ✅
+   - **File**: `GameScene.swift:setupHUD()` and related UI methods
+   - **Enhancements**: 
+     - Health bar enlarged to 25% screen width for visibility
+     - Text changed to white for better contrast
+     - Enhanced font sizes (28pt-32pt) for cross-device readability
+     - Better HUD background with enhanced transparency (alpha 0.9)
+
+4. **Button Responsiveness Fix** 👆 → ✅
+   - **File**: `GameScene.swift:button creation and positioning`
+   - **Fix**: Proper z-positioning (z:1000) for game end buttons
+   - **Result**: All buttons now respond correctly to touch input
+   - **Impact**: Game over screen fully functional
+
+5. **Visual Polish and Spacing** ✨ → ✅
+   - **File**: `BaseTank.swift:track positioning`
+   - **Enhancement**: Tracks positioned much closer to tank body (1.5% offset instead of 2%)
+   - **Wheels**: Smaller, better-proportioned wheels (12% instead of 15% of tank size)
+   - **Result**: Enhanced visual hierarchy and professional appearance
+
+### Technical Implementation Details:
+
+#### Rotating Track System Code:
+```swift
+private func updateTrackPositions() {
+    let trackOffset = cachedTankSize * 0.015  // 1.5% offset
+    
+    switch direction {
+    case .up, .down:
+        // Vertical orientation for up/down movement
+        leftTrack.position = CGPoint(x: -cachedHalfTankWidth - trackOffset, y: 0)
+        rightTrack.position = CGPoint(x: cachedHalfTankWidth + trackOffset, y: 0)
+        leftTrack.zRotation = 0
+        rightTrack.zRotation = 0
+    case .left, .right:
+        // Horizontal orientation for left/right movement
+        leftTrack.position = CGPoint(x: 0, y: cachedHalfTankHeight + trackOffset)
+        rightTrack.position = CGPoint(x: 0, y: -cachedHalfTankHeight - trackOffset)
+        leftTrack.zRotation = CGFloat.pi / 2
+        rightTrack.zRotation = CGFloat.pi / 2
+    }
+}
+```
+
+#### Enhanced Collision Physics:
+```swift
+// Player tank collision with enemy tanks
+physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.enemyTank
+physicsBody?.contactTestBitMask = PhysicsCategory.enemyBullet | PhysicsCategory.powerUp | PhysicsCategory.enemyTank
+
+// Enemy tank collision with player and other enemies
+physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.playerTank | PhysicsCategory.enemyTank
+```
+
+#### Professional UI Scaling:
+```swift
+// Enhanced health bar (25% screen width)
+healthBarWidth = screenWidth * 0.25
+
+// Improved font sizes
+scoreLabel.fontSize = screenWidth * 0.045  // 28pt equivalent
+livesLabel.fontSize = screenWidth * 0.052  // 32pt equivalent  
+healthLabel.fontSize = screenWidth * 0.042  // 26pt equivalent
+
+// Button z-positioning for responsiveness
+buttonNode.zPosition = 1000
+```
+
+---
+
 *This technical architecture document serves as the complete reference for understanding, maintaining, and extending the IOS TankieTankz game system.*
 
 **Last Updated**: January 2025  
-**Document Version**: 1.0  
-**Game Status**: Production Ready
+**Document Version**: 2.0  
+**Game Status**: Production Ready - Major UI and Gameplay Enhancements Applied

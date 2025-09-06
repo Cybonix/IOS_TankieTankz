@@ -47,43 +47,47 @@ IOS_TankieTankz/
 ### Key Systems
 
 #### Tank System (`BaseTank.swift`)
-- **Wider Tank Design**: 1.3x width ratio for better appearance
-- **Animated Tracks**: Smooth wheel and track animations
-- **Performance Cached**: Dimensions cached to prevent recalculation
-- **Direction-Aware**: Cannon positioning based on movement direction
+- **Wider Tank Design**: 1.3x width ratio for realistic tank proportions
+- **Rotating Track System**: Tracks and wheels reorient based on movement direction
+- **Enhanced Collision**: Tank-to-tank collision detection prevents overlap
+- **Performance Cached**: All dimensions cached to prevent recalculation overhead
+- **Realistic Physics**: Cannon positioning and bullet spawning from proper locations
 
 #### Physics System
-- **Collision Detection**: Proper bullet-tank collision with rectangular physics bodies
-- **Category-Based**: Separate physics categories for players, enemies, bullets
-- **Boundary Management**: Tanks stay within screen bounds with proper margins
+- **Comprehensive Collision**: Bullet-tank AND tank-to-tank collision detection
+- **Realistic Physics Bodies**: Rectangular shapes matching wider tank visuals (1.3x width)
+- **Category-Based**: Separate physics categories with proper interaction masks
+- **Boundary Management**: Tanks stay within screen bounds with intelligent bouncing
 
 #### UI System
-- **Percentage-Based Scaling**: All UI elements scale based on screen width
-- **HUD Layout**: Score, level, lives (hearts), and health bar
-- **Responsive Buttons**: 60% width x 12% height touch targets
-- **Font Scaling**: Dynamic font sizing (3.5% - 7% of screen width)
+- **Enhanced Visibility**: Larger health bar (25% screen width), improved text contrast
+- **Professional HUD**: Score, level, lives (hearts), and health bar with better spacing
+- **Responsive Buttons**: 60% width x 12% height touch targets with proper z-positioning
+- **Dynamic Font Scaling**: Optimized text sizes (28pt-32pt) for cross-device readability
+- **Visual Hierarchy**: Proper layering and contrast for professional appearance
 
 ## 🚀 Current Status (January 2025)
 
 ### ✅ Completed Features
-- [x] Core tank movement and combat
-- [x] Bullet physics and collision detection  
+- [x] Core tank movement and combat with realistic tank physics
+- [x] Bullet physics and collision detection from cannon tips
+- [x] **Tank-to-tank collision system** - No more overlapping tanks
 - [x] Power-up system with visual effects
-- [x] Multi-biome background system
-- [x] Boss battle mechanics
-- [x] Sound integration (CAF files)
-- [x] Performance optimizations
-- [x] UI scaling and responsiveness
-- [x] Tank track animations
-- [x] Smooth gameplay mechanics
+- [x] Multi-biome background system with 4 environments
+- [x] Boss battle mechanics with enhanced AI
+- [x] Sound integration (8 CAF audio files)
+- [x] Performance optimizations with cached calculations
+- [x] **Professional UI scaling** - Enhanced readability and responsiveness
+- [x] **Rotating tank tracks** - Tracks orient with tank direction
+- [x] **Smooth gameplay mechanics** - 60 FPS with realistic animations
 
-### 🎯 Recent Major Fixes (Latest Session)
-- [x] **Division by Zero Fix**: Prevented game crashes in animation calculations
-- [x] **Bullet Direction**: Fixed backwards shooting, bullets now spawn from cannon tips
-- [x] **Tank Tracks**: Moved tracks closer to tank body (2% offset instead of 5%)
-- [x] **Cannon Positioning**: Corrected up/down cannon directions in SpriteKit coordinates
-- [x] **Performance**: Cached tank dimensions to eliminate calculation overhead
-- [x] **Track Animation**: Fixed floating tracks with proper base position resets
+### 🎯 Latest Major Improvements (Current Session)
+- [x] **Rotating Tank Track System**: Tracks now rotate with tank direction (vertical for up/down, horizontal for left/right movement)
+- [x] **Enhanced Tank Collision**: Added tank-to-tank collision detection - tanks can no longer overlap
+- [x] **UI Overhaul**: Larger health bar (25% screen width), improved text visibility, better HUD contrast
+- [x] **Button Responsiveness**: Fixed game end buttons with proper z-positioning and touch detection
+- [x] **Visual Polish**: Tracks positioned much closer to tank body (1.5% offset), better proportions
+- [x] **Professional Appearance**: Enhanced visual hierarchy and spacing throughout the interface
 
 ### 🔧 Technical Improvements
 - **Animation System**: 8 frames with 3-frame intervals for smoother movement
