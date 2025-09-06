@@ -146,7 +146,10 @@ class Bullet: SKShapeNode {
     }
     
     func updatePosition() {
-        let speed: CGFloat = isEnemy ? 5 : 10
+        // Use proportional bullet speed for smoother gameplay
+        let screenWidth = UIScreen.main.bounds.width
+        let baseSpeed = screenWidth * 0.02  // 2% of screen width
+        let speed: CGFloat = isEnemy ? baseSpeed : (baseSpeed * 1.5)  // Player bullets slightly faster
         
         switch direction {
         case .up:
