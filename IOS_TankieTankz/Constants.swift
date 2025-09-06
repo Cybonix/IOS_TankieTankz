@@ -7,14 +7,43 @@
 
 import Foundation
 import SpriteKit
+import UIKit
+
+// MARK: - Screen Scaling
+struct ScreenScale {
+    // Base reference screen (iPhone 8 size in points)
+    static let referenceWidth: CGFloat = 375
+    static let referenceHeight: CGFloat = 667
+    
+    // Get current screen scale factor
+    static var scaleFactor: CGFloat {
+        let screenBounds = UIScreen.main.bounds
+        let scaleX = screenBounds.width / referenceWidth
+        let scaleY = screenBounds.height / referenceHeight
+        // Use the smaller scale to ensure objects fit on screen
+        return min(scaleX, scaleY)
+    }
+    
+    // Scale a value based on current screen size
+    static func scale(_ value: CGFloat) -> CGFloat {
+        return value * scaleFactor
+    }
+}
 
 // MARK: - Tank Properties
 struct TankConstants {
-    static let PLAYER_TANK_SIZE: CGFloat = 50
-    static let ENEMY_TANK_SIZE: CGFloat = 50
-    static let BOSS_TANK_SIZE: CGFloat = 75
+    // Base sizes (will be scaled for different screens)
+    static let BASE_PLAYER_TANK_SIZE: CGFloat = 35
+    static let BASE_ENEMY_TANK_SIZE: CGFloat = 35
+    static let BASE_BOSS_TANK_SIZE: CGFloat = 50
+    
+    // Scaled sizes
+    static var PLAYER_TANK_SIZE: CGFloat { ScreenScale.scale(BASE_PLAYER_TANK_SIZE) }
+    static var ENEMY_TANK_SIZE: CGFloat { ScreenScale.scale(BASE_ENEMY_TANK_SIZE) }
+    static var BOSS_TANK_SIZE: CGFloat { ScreenScale.scale(BASE_BOSS_TANK_SIZE) }
+    
     static let BOSS_SCALE_FACTOR: CGFloat = 1.5
-    static let TANK_CENTER_OFFSET: CGFloat = 25
+    static var TANK_CENTER_OFFSET: CGFloat { ScreenScale.scale(25) }
 }
 
 // MARK: - Health and Combat
@@ -32,9 +61,16 @@ struct CombatConstants {
 
 // MARK: - Weapon Properties
 struct WeaponConstants {
-    static let BULLET_SIZE: CGFloat = 8
+    // Base sizes
+    static let BASE_BULLET_SIZE: CGFloat = 6
+    static let BASE_MISSILE_SIZE: CGFloat = 8
+    
+    // Scaled sizes
+    static var BULLET_SIZE: CGFloat { ScreenScale.scale(BASE_BULLET_SIZE) }
+    static var MISSILE_SIZE: CGFloat { ScreenScale.scale(BASE_MISSILE_SIZE) }
+    
+    // Speeds (don't scale these as they're movement rates)
     static let BULLET_SPEED: CGFloat = 12
-    static let MISSILE_SIZE: CGFloat = 10
     static let MISSILE_SPEED: CGFloat = 8
     static let MISSILE_MAX_LIFETIME: TimeInterval = 10.0
     static let RAPID_FIRE_INTERVAL: TimeInterval = 0.1

@@ -29,13 +29,18 @@ class GameViewController: UIViewController {
         
         // Configure the view
         if let view = self.view as! SKView? {
-            // Create the game scene with a smaller logical size for better scaling
-            let sceneSize = CGSize(width: 320, height: 568) // Smaller logical size for iPhone
+            // Get actual device screen bounds
+            let screenBounds = UIScreen.main.bounds
+            let screenScale = UIScreen.main.scale
+            
+            // Create logical scene size based on screen points (not pixels)
+            // This ensures consistent gameplay across all iPhone models
+            let sceneSize = CGSize(width: screenBounds.width, height: screenBounds.height)
             let scene = GameScene(size: sceneSize)
             gameScene = scene
             
-            // Set the scale mode to scale to fit window while maintaining aspect ratio
-            scene.scaleMode = .aspectFit
+            // Use aspectFill to fill the entire screen while maintaining aspect ratio
+            scene.scaleMode = .aspectFill
             
             // Present the scene
             view.presentScene(scene)
@@ -43,8 +48,9 @@ class GameViewController: UIViewController {
             view.ignoresSiblingOrder = true
             
             // Define control zones (left half for movement, right half for firing)
-            let screenWidth = view.bounds.size.width
-            let screenHeight = view.bounds.size.height
+            // Use screen bounds for consistent touch zones across all devices
+            let screenWidth = screenBounds.width
+            let screenHeight = screenBounds.height
             movementZone = CGRect(x: 0, y: 0, width: screenWidth / 2, height: screenHeight)
             firingZone = CGRect(x: screenWidth / 2, y: 0, width: screenWidth / 2, height: screenHeight)
             

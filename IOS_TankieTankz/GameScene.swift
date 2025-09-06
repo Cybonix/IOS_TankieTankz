@@ -801,7 +801,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if abs(dx) > abs(dy) {
                 firingDirection = dx > 0 ? .right : .left
             } else {
-                firingDirection = dy > 0 ? .down : .up
+                firingDirection = dy > 0 ? .up : .down
             }
             
             // Update player tank direction
@@ -841,8 +841,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let dx = position.x - playerTank.position.x
         let dy = position.y - playerTank.position.y
         
-        let moveSpeed: CGFloat = 3.0
-        let threshold: CGFloat = 20.0 // Minimum distance to move
+        let moveSpeed: CGFloat = ScreenScale.scale(3.0)
+        let threshold: CGFloat = ScreenScale.scale(20.0) // Minimum distance to move
         
         if abs(dx) > threshold || abs(dy) > threshold {
             if abs(dx) > abs(dy) {
@@ -854,8 +854,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             
             // Keep tank within bounds
-            let hudHeight: CGFloat = 100
-            let tankSize: CGFloat = 50 * 1.1 + 5
+            let hudHeight: CGFloat = ScreenScale.scale(100)
+            let tankSize: CGFloat = TankConstants.PLAYER_TANK_SIZE * 1.1 + ScreenScale.scale(5)
             
             playerTank.position.x = max(tankSize/2, min(size.width - tankSize/2, playerTank.position.x))
             playerTank.position.y = max(tankSize/2, min(size.height - hudHeight - tankSize/2, playerTank.position.y))

@@ -24,7 +24,8 @@ class Bullet: SKShapeNode {
         self.biomeType = biomeType
         
         // Size will be larger for boss bullets and adjusted for biome visibility
-        bulletSize = fromBoss ? 12 : (biomeType == .desert || biomeType == .snow ? 7 : 5)
+        let baseSize = WeaponConstants.BULLET_SIZE
+        bulletSize = fromBoss ? (baseSize * 1.5) : (biomeType == .desert || biomeType == .snow ? (baseSize * 1.2) : baseSize)
         
         super.init()
         
