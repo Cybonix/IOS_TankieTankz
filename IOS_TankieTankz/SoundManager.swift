@@ -48,27 +48,61 @@ class SoundManager {
     }
     
     private func createToneBasedSounds() {
-        // Using AudioServicesPlaySystemSound for quick development
-        // In a full implementation, we would replace these with actual game sounds
+        // Load actual audio files from the bundle
+        loadAudioFile(.playerShoot, fileName: "player_shoot", fileExtension: "caf")
+        loadAudioFile(.enemyShoot, fileName: "enemy_shoot", fileExtension: "caf")
+        loadAudioFile(.playerMove, fileName: "player_move", fileExtension: "caf")
+        loadAudioFile(.enemyMove, fileName: "enemy_move", fileExtension: "caf")
+        loadAudioFile(.explosion, fileName: "explosion", fileExtension: "caf")
+        loadAudioFile(.enemyHit, fileName: "enemy_hit", fileExtension: "caf")
+        loadAudioFile(.playerHit, fileName: "player_hit", fileExtension: "caf")
+        loadAudioFile(.bossTankMove, fileName: "boss_tank_move", fileExtension: "caf")
         
-        // Create system sound effects based on frequency
-        // Note: These frequencies would be used to generate tones in a full implementation
-        let _: Float = 1000 // playerShootFreq
-        let _: Float = 800  // enemyShootFreq
-        let _: Float = 400  // moveFreq
-        let _: Float = 200  // explosionFreq
-        let _: Float = 1200 // powerUpFreq
+        // Load OGG files for victory sounds (we'll try both formats)
+        loadAudioFile(.victory, fileName: "victory", fileExtension: "ogg")
+        loadAudioFile(.finalVictory, fileName: "final_victory", fileExtension: "ogg")
         
-        // Create audio files or use system sounds as a fallback
-        // This is just a placeholder implementation
-        
-        // In production, you'd load audio files like this:
-        // if let path = Bundle.main.path(forResource: "player_shoot", ofType: "caf") {
-        //     let url = URL(fileURLWithPath: path)
-        //     let player = try? AVAudioPlayer(contentsOf: url)
-        //     player?.prepareToPlay()
-        //     audioPlayers[.playerShoot] = player
-        // }
+        // Use default system sounds for missing audio
+        setupSystemSoundFallbacks()
+    }
+    
+    private func loadAudioFile(_ soundType: SoundType, fileName: String, fileExtension: String) {
+        if let path = Bundle.main.path(forResource: fileName, ofType: fileExtension) {
+            let url = URL(fileURLWithPath: path)
+            do {
+                let player = try AVAudioPlayer(contentsOf: url)
+                player.prepareToPlay()
+                player.volume = 0.7 // Set reasonable volume
+                audioPlayers[soundType] = player
+                print("✅ Loaded audio: \(fileName).\(fileExtension)")
+            } catch {
+                print("❌ Error loading audio file \(fileName).\(fileExtension): \(error)")
+                setupSystemSoundFallback(for: soundType)
+            }
+        } else {
+            print("❌ Audio file not found: \(fileName).\(fileExtension)")
+            setupSystemSoundFallback(for: soundType)
+        }
+    }
+    
+    private func setupSystemSoundFallbacks() {
+        // Set up system sound fallbacks for any missing audio
+        for soundType in [SoundType.powerUpCollect, .powerUpActivate, .powerUpExpire, .missileFire, .missileImpact] {
+            if audioPlayers[soundType] == nil {
+                setupSystemSoundFallback(for: soundType)
+            }
+        }
+    }
+    
+    private func setupSystemSoundFallback(for soundType: SoundType) {
+        let systemSoundId: SystemSoundID = switch soundType {
+        case .playerShoot, .enemyShoot: 1103 // Tock sound
+        case .explosion, .enemyHit, .playerHit: 1005 // New mail sound
+        case .powerUpCollect, .powerUpActivate: 1000 // Click sound
+        case .victory, .finalVictory: 1016 // Horn sound
+        default: 1103 // Default tock sound
+        }
+        soundEffects[soundType] = systemSoundId
     }
     
     func playSound(_ type: SoundType) {
