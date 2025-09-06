@@ -54,6 +54,7 @@ class BaseTank: SKSpriteNode {
     
     private func setupTankVisualsDeferred() {
         setupTankVisuals()
+        setupPhysicsBody()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -265,5 +266,25 @@ class BaseTank: SKSpriteNode {
         tankBody.fillColor = baseColor
         tankCannon.fillColor = baseColor
         // Would need to update other tank parts as well
+    }
+    
+    private func setupPhysicsBody() {
+        let size = isPlayer ? TankConstants.PLAYER_TANK_SIZE : TankConstants.ENEMY_TANK_SIZE
+        let tankSize = CGSize(width: size, height: size)
+        
+        physicsBody = SKPhysicsBody(rectangleOf: tankSize)
+        physicsBody?.isDynamic = true
+        physicsBody?.affectedByGravity = false
+        physicsBody?.allowsRotation = false
+        
+        if isPlayer {
+            physicsBody?.categoryBitMask = PhysicsCategory.playerTank
+            physicsBody?.contactTestBitMask = PhysicsCategory.enemyBullet | PhysicsCategory.powerUp
+            physicsBody?.collisionBitMask = PhysicsCategory.wall
+        } else {
+            physicsBody?.categoryBitMask = PhysicsCategory.enemyTank
+            physicsBody?.contactTestBitMask = PhysicsCategory.playerBullet | PhysicsCategory.playerMissile
+            physicsBody?.collisionBitMask = PhysicsCategory.wall
+        }
     }
 }

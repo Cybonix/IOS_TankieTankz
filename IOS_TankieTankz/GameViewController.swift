@@ -29,13 +29,13 @@ class GameViewController: UIViewController {
         
         // Configure the view
         if let view = self.view as! SKView? {
-            // Create the game scene with a fixed logical size
-            let sceneSize = CGSize(width: 414, height: 896) // iPhone size that scales well
+            // Create the game scene with a smaller logical size for better scaling
+            let sceneSize = CGSize(width: 320, height: 568) // Smaller logical size for iPhone
             let scene = GameScene(size: sceneSize)
             gameScene = scene
             
-            // Set the scale mode to resize to fit window while maintaining aspect ratio
-            scene.scaleMode = .aspectFill
+            // Set the scale mode to scale to fit window while maintaining aspect ratio
+            scene.scaleMode = .aspectFit
             
             // Present the scene
             view.presentScene(scene)

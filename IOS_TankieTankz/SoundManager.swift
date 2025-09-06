@@ -58,9 +58,9 @@ class SoundManager {
         loadAudioFile(.playerHit, fileName: "player_hit", fileExtension: "caf")
         loadAudioFile(.bossTankMove, fileName: "boss_tank_move", fileExtension: "caf")
         
-        // Load OGG files for victory sounds (we'll try both formats)
-        loadAudioFile(.victory, fileName: "victory", fileExtension: "ogg")
-        loadAudioFile(.finalVictory, fileName: "final_victory", fileExtension: "ogg")
+        // Victory sounds - use system sound fallbacks since iOS doesn't support OGG natively
+        setupSystemSoundFallback(for: .victory)
+        setupSystemSoundFallback(for: .finalVictory)
         
         // Use default system sounds for missing audio
         setupSystemSoundFallbacks()

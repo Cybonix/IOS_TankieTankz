@@ -8,7 +8,7 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // MARK: - Properties
     
@@ -92,6 +92,10 @@ class GameScene: SKScene {
     // MARK: - Scene Setup
     
     override func didMove(to view: SKView) {
+        // Setup physics world
+        physicsWorld.contactDelegate = self
+        physicsWorld.gravity = CGVector(dx: 0, dy: 0) // No gravity for this game
+        
         setupGame()
     }
     
@@ -837,10 +841,27 @@ class GameScene: SKScene {
         let dx = position.x - playerTank.position.x
         let dy = position.y - playerTank.position.y
         
-        if abs(dx) > abs(dy) {
-            playerTank.direction = dx > 0 ? .right : .left
-        } else {
-            playerTank.direction = dy > 0 ? .down : .up
+        let moveSpeed: CGFloat = 3.0
+        let threshold: CGFloat = 20.0 // Minimum distance to move
+        
+        if abs(dx) > threshold || abs(dy) > threshold {
+            if abs(dx) > abs(dy) {
+                playerTank.direction = dx > 0 ? .right : .left
+                playerTank.position.x += dx > 0 ? moveSpeed : -moveSpeed
+            } else {
+                playerTank.direction = dy > 0 ? .up : .down
+                playerTank.position.y += dy > 0 ? moveSpeed : -moveSpeed
+            }
+            
+            // Keep tank within bounds
+            let hudHeight: CGFloat = 100
+            let tankSize: CGFloat = 50 * 1.1 + 5
+            
+            playerTank.position.x = max(tankSize/2, min(size.width - tankSize/2, playerTank.position.x))
+            playerTank.position.y = max(tankSize/2, min(size.height - hudHeight - tankSize/2, playerTank.position.y))
+            
+            // Play movement sound
+            soundManager?.playSound(.playerMove)
         }
     }
     
@@ -1632,5 +1653,183 @@ class GameScene: SKScene {
     func addBullet(_ bullet: Bullet) {
         addChild(bullet)
         bullets.append(bullet)
+    }
+    
+    // MARK: - Physics Contact Delegate
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        let contactA = contact.bodyA.categoryBitMask
+        let contactB = contact.bodyB.categoryBitMask
+        
+        // Player bullet hits enemy tank
+        if (contactA == PhysicsCategory.playerBullet && contactB == PhysicsCategory.enemyTank) ||
+           (contactA == PhysicsCategory.enemyTank && contactB == PhysicsCategory.playerBullet) {
+            
+            let bulletNode = contactA == PhysicsCategory.playerBullet ? contact.bodyA.node : contact.bodyB.node
+            let tankNode = contactA == PhysicsCategory.enemyTank ? contact.bodyA.node : contact.bodyB.node
+            
+            if let bullet = bulletNode as? Bullet, let enemyTank = tankNode as? EnemyTank {
+                handleBulletHitEnemy(bullet: bullet, enemyTank: enemyTank)
+            }
+        }
+        
+        // Enemy bullet hits player tank
+        if (contactA == PhysicsCategory.enemyBullet && contactB == PhysicsCategory.playerTank) ||
+           (contactA == PhysicsCategory.playerTank && contactB == PhysicsCategory.enemyBullet) {
+            
+            let bulletNode = contactA == PhysicsCategory.enemyBullet ? contact.bodyA.node : contact.bodyB.node
+            let tankNode = contactA == PhysicsCategory.playerTank ? contact.bodyA.node : contact.bodyB.node
+            
+            if let bullet = bulletNode as? Bullet, let playerTank = tankNode as? BaseTank {
+                handleBulletHitPlayer(bullet: bullet, playerTank: playerTank)
+            }
+        }
+        
+        // Player missile hits enemy tank
+        if (contactA == PhysicsCategory.playerMissile && contactB == PhysicsCategory.enemyTank) ||
+           (contactA == PhysicsCategory.enemyTank && contactB == PhysicsCategory.playerMissile) {
+            
+            let missileNode = contactA == PhysicsCategory.playerMissile ? contact.bodyA.node : contact.bodyB.node
+            let tankNode = contactA == PhysicsCategory.enemyTank ? contact.bodyA.node : contact.bodyB.node
+            
+            if let missile = missileNode as? Missile, let enemyTank = tankNode as? EnemyTank {
+                handleMissileHitEnemy(missile: missile, enemyTank: enemyTank)
+            }
+        }
+        
+        // Player tank collects power-up
+        if (contactA == PhysicsCategory.playerTank && contactB == PhysicsCategory.powerUp) ||
+           (contactA == PhysicsCategory.powerUp && contactB == PhysicsCategory.playerTank) {
+            
+            let powerUpNode = contactA == PhysicsCategory.powerUp ? contact.bodyA.node : contact.bodyB.node
+            
+            if let powerUp = powerUpNode as? PowerUp {
+                handlePowerUpCollection(powerUp: powerUp)
+            }
+        }
+    }
+    
+    private func handleBulletHitEnemy(bullet: Bullet, enemyTank: EnemyTank) {
+        // Remove bullet
+        bullet.removeFromParent()
+        if let index = bullets.firstIndex(of: bullet) {
+            bullets.remove(at: index)
+        }
+        
+        // Damage enemy tank
+        let damage = damageBoostActive ? 40 : 20
+        enemyTank.health -= damage
+        
+        // Trigger hit flash effect
+        enemyTank.isHit = true
+        enemyTank.hitFlashStartTime = CACurrentMediaTime()
+        
+        soundManager?.playSound(.enemyHit)
+        
+        if enemyTank.health <= 0 {
+            // Enemy destroyed
+            enemyTank.removeFromParent()
+            if let index = enemyTanks.firstIndex(of: enemyTank) {
+                enemyTanks.remove(at: index)
+            }
+            
+            // Add explosion
+            createExplosion(at: enemyTank.position)
+            
+            // Update score
+            score += enemyTank.isBoss ? 500 : 100
+            tanksDestroyed += 1
+            updateScoreDisplay()
+        }
+    }
+    
+    private func handleBulletHitPlayer(bullet: Bullet, playerTank: BaseTank) {
+        // Remove bullet
+        bullet.removeFromParent()
+        if let index = bullets.firstIndex(of: bullet) {
+            bullets.remove(at: index)
+        }
+        
+        // Don't damage player if shield is active
+        if shieldActive { return }
+        
+        // Damage player tank
+        playerTank.health -= 20
+        soundManager?.playSound(.playerHit)
+        updateHealthUI()
+        
+        if playerTank.health <= 0 {
+            // Player destroyed - use existing game logic
+            isPlayerDestroyed = true
+            isGameEnding = true
+            gameOverDelayStartTime = CACurrentMediaTime()
+            
+            // Create explosion
+            createExplosion(at: playerTank.position)
+        }
+    }
+    
+    private func handleMissileHitEnemy(missile: Missile, enemyTank: EnemyTank) {
+        // Remove missile
+        missile.removeFromParent()
+        if let index = missiles.firstIndex(of: missile) {
+            missiles.remove(at: index)
+        }
+        
+        // Missiles do more damage
+        let missileDamage = damageBoostActive ?
+            (enemyTank.isBoss ? 100 : 80) :
+            (enemyTank.isBoss ? 75 : 60)
+        
+        enemyTank.health -= missileDamage
+        
+        // Trigger hit flash effect
+        enemyTank.isHit = true
+        enemyTank.hitFlashStartTime = CACurrentMediaTime()
+        
+        soundManager?.playSound(.enemyHit)
+        
+        if enemyTank.health <= 0 {
+            // Enemy destroyed
+            enemyTank.removeFromParent()
+            if let index = enemyTanks.firstIndex(of: enemyTank) {
+                enemyTanks.remove(at: index)
+            }
+            
+            // Add explosion
+            createExplosion(at: enemyTank.position)
+            
+            // Update score
+            score += enemyTank.isBoss ? 500 : 100
+            tanksDestroyed += 1
+            updateScoreDisplay()
+        }
+    }
+    
+    private func handlePowerUpCollection(powerUp: PowerUp) {
+        // Remove power-up
+        powerUp.removeFromParent()
+        
+        // Play sound
+        soundManager?.playSound(.powerUpCollect)
+        
+        // For now, provide immediate temporary effects for testing collision detection
+        switch powerUp.type {
+        case .rapidFire:
+            rapidFireActive = true
+            rapidFireUntil = CACurrentMediaTime() + 5.0
+        case .damageBoost:
+            damageBoostActive = true
+            damageBoostUntil = CACurrentMediaTime() + 5.0
+        case .shieldBoost:
+            shieldActive = true
+            shieldUntil = CACurrentMediaTime() + 5.0
+        case .extraLife:
+            playerLives += 1
+            updateLivesDisplay()
+        case .missileAutoFire:
+            missileAutoFireActive = true
+            // This would be handled by missile system in full implementation
+        }
     }
 }
