@@ -182,7 +182,7 @@ class BaseTank: SKSpriteNode {
     }
     
     private func updateCannonPosition() {
-        guard tankCannon != nil else { return }
+        guard tankCannon != nil, currentTankSize > 0 else { return }
         
         // Use the actual tank dimensions for wider tank
         let tankWidth = currentTankSize * 1.3
@@ -212,7 +212,7 @@ class BaseTank: SKSpriteNode {
         lastPosition = position
         
         // Move based on direction with smoother, proportional speed
-        let moveSpeed = currentTankSize * 0.15  // 15% of tank size for smooth movement
+        let moveSpeed = max(1, currentTankSize * 0.15)  // 15% of tank size for smooth movement, minimum 1
         switch direction {
         case .up:
             position.y += moveSpeed
@@ -242,14 +242,15 @@ class BaseTank: SKSpriteNode {
     }
     
     private func updateWheelAnimation() {
-        guard isMoving else { return }
+        guard isMoving, currentTankSize > 0 else { return }
         
         // Use proportional values based on wider tank dimensions
         let tankHeight = currentTankSize
         let halfTankHeight = tankHeight / 2
         let wheelDistance: CGFloat = tankHeight / 4  // Same as in setupTracksAndWheels
-        let animationRange = currentTankSize * 0.06  // Smaller animation range for smoother movement
-        let animOffset = CGFloat(animationFrame * 2 % Int(animationRange))
+        let animationRange = max(1, currentTankSize * 0.06)  // Ensure minimum range and prevent zero
+        let animationRangeInt = max(1, Int(animationRange))  // Ensure at least 1 to prevent division by zero
+        let animOffset = CGFloat(animationFrame * 2 % animationRangeInt)
         let reverseAnimOffset = animationRange - animOffset
         
         // Animate wheels based on direction
@@ -284,7 +285,7 @@ class BaseTank: SKSpriteNode {
     private func animateTracks() {
         guard isMoving, let leftTrack = leftTrack, let rightTrack = rightTrack else { return }
         
-        let trackAnimationOffset = CGFloat(animationFrame % 4) * 0.5 // Small offset for track movement
+        let trackAnimationOffset = CGFloat(animationFrame % max(4, 1)) * 0.5 // Small offset for track movement
         let baseLeftX = leftTrack.position.x
         let baseRightX = rightTrack.position.x
         
