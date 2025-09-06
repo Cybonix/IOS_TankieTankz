@@ -97,12 +97,3 @@ struct iOSConstants {
     static let HAPTIC_FEEDBACK_INTENSITY: Float = 0.5
     static let FIXED_TIMESTEP: TimeInterval = 1.0 / 60.0
 }
-
-// Notification names for game events
-extension Notification.Name {
-    static let gameDidPause = Notification.Name("GameShouldPause")
-    static let gameDidResume = Notification.Name("GameShouldResume")
-    static let gameShouldSaveState = Notification.Name("GameShouldSaveState")
-    static let levelDidComplete = Notification.Name("LevelDidComplete")
-    static let gameDidComplete = Notification.Name("GameDidComplete")
-}

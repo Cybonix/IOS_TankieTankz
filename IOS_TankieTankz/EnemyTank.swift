@@ -15,19 +15,32 @@ class EnemyTank: BaseTank {
     private var directionChangeTime: TimeInterval = 0
     private let directionChangeInterval: TimeInterval = 2.0
     
-    init(position: CGPoint, direction: Direction, isBoss: Bool, bossType: BossType = .assault) {
+    // Convenience initializer for backward compatibility
+    convenience init(position: CGPoint, direction: Direction, isBoss: Bool) {
+        self.init(position: position, direction: direction, isBoss: isBoss, bossType: .assault)
+    }
+    
+    // Main initializer
+    init(position: CGPoint, direction: Direction, isBoss: Bool, bossType: BossType) {
         let health = isBoss ? CombatConstants.BOSS_MAX_HEALTH : CombatConstants.ENEMY_MAX_HEALTH
-        super.init(position: position, direction: direction, health: health, isPlayer: false)
         
+        // Set instance properties before super.init
         self.isBoss = isBoss
         self.bossType = bossType
+        self.isDestroyed = false
+        self.directionChangeTime = 0
         
-        if isBoss {
-            setupBossAppearance()
-            setScale(TankConstants.BOSS_SCALE_FACTOR)
-        }
+        // Call super init
+        super.init(position: position, direction: direction, health: health, isPlayer: false)
         
+        // Setup physics body
         setupPhysicsBody()
+        
+        // Setup boss appearance if needed
+        if isBoss {
+            setScale(TankConstants.BOSS_SCALE_FACTOR)
+            setupBossAppearance()
+        }
     }
     
     private func setupBossAppearance() {

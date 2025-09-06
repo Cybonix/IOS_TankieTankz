@@ -171,6 +171,14 @@ struct MathUtils {
     }
 }
 
+// MARK: - BiomeType Enum
+enum BiomeType: Int {
+    case urban = 0
+    case desert = 1  
+    case snow = 2
+    case volcanic = 3
+}
+
 // MARK: - Direction Enum (iOS equivalent of Android Direction enum)
 enum Direction: CaseIterable {
     case up, down, left, right
@@ -198,39 +206,6 @@ enum Direction: CaseIterable {
             return .pi
         case .right:
             return 0
-        }
-    }
-}
-
-// MARK: - PowerUp Extensions (iOS equivalent)
-extension PowerUpType {
-    var extensionDuration: TimeInterval {
-        switch self {
-        case .shieldBoost:
-            return PowerUpConstants.SHIELD_DURATION
-        case .rapidFire:
-            return PowerUpConstants.RAPID_FIRE_DURATION
-        case .damageBoost:
-            return PowerUpConstants.DAMAGE_BOOST_DURATION
-        case .extraLife:
-            return 0 // Instant effect
-        case .missileAutoFire:
-            return PowerUpConstants.INVINCIBILITY_DURATION
-        }
-    }
-    
-    var extensionColor: UIColor {
-        switch self {
-        case .shieldBoost:
-            return ColorScheme.POWER_UP_SHIELD
-        case .rapidFire:
-            return ColorScheme.POWER_UP_RAPID_FIRE
-        case .damageBoost:
-            return ColorScheme.POWER_UP_DAMAGE_BOOST
-        case .extraLife:
-            return ColorScheme.POWER_UP_EXTRA_LIFE
-        case .missileAutoFire:
-            return ColorScheme.POWER_UP_INVINCIBILITY
         }
     }
 }

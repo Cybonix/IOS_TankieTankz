@@ -325,18 +325,6 @@ class GameScene: SKScene {
         addChild(backgroundSprite)
     }
     
-    private func colorForBiome(_ biome: BiomeType) -> SKColor {
-        switch biome {
-        case .urban:
-            return SKColor(red: 0.0, green: 0.16, blue: 0.0, alpha: 1.0) // Dark green
-        case .desert:
-            return SKColor(red: 0.24, green: 0.16, blue: 0.08, alpha: 1.0) // Brown
-        case .snow:
-            return SKColor(red: 0.12, green: 0.16, blue: 0.35, alpha: 1.0) // Deep blue
-        case .volcanic:
-            return SKColor(red: 0.12, green: 0.0, blue: 0.2, alpha: 1.0) // Dark purple
-        }
-    }
     
     private func spawnEnemyTank(isInitialSpawn: Bool = false) {
         let screenWidth = size.width
@@ -383,8 +371,7 @@ class GameScene: SKScene {
             newEnemyTank = EnemyTank(
                 position: CGPoint(x: randomX, y: size.height - 150),
                 direction: .down,
-                isBoss: false,
-                bossType: .assault // Default value, not used for regular tanks
+                isBoss: false
             )
         }
         
