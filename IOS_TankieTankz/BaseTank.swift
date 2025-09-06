@@ -19,7 +19,8 @@ class BaseTank: SKSpriteNode {
     
     // Animation properties
     private var animationFrame: Int = 0
-    private let maxAnimationFrames: Int = 4
+    private let maxAnimationFrames: Int = 8  // More frames for smoother animation
+    private var animationFrameCounter: Int = 0  // Counter to slow down animation
     private var isMoving: Bool = false
     private var lastPosition: CGPoint = .zero
     
@@ -226,9 +227,13 @@ class BaseTank: SKSpriteNode {
         // Check if actually moved
         isMoving = (lastPosition != position)
         
-        // Update animation frame if moving
+        // Update animation frame if moving (slower animation for smoothness)
         if isMoving {
-            animationFrame = (animationFrame + 1) % maxAnimationFrames
+            animationFrameCounter += 1
+            if animationFrameCounter >= 3 {  // Update every 3 frames for smoother animation
+                animationFrame = (animationFrame + 1) % maxAnimationFrames
+                animationFrameCounter = 0
+            }
             updateWheelAnimation()
         }
         
@@ -237,30 +242,61 @@ class BaseTank: SKSpriteNode {
     }
     
     private func updateWheelAnimation() {
+        guard isMoving else { return }
+        
         // Use proportional values based on wider tank dimensions
         let tankHeight = currentTankSize
         let halfTankHeight = tankHeight / 2
         let wheelDistance: CGFloat = tankHeight / 4  // Same as in setupTracksAndWheels
-        let animationRange = currentTankSize * 0.08  // 8% of tank size for animation range
-        let animOffset = isMoving ? CGFloat(animationFrame * 2 % Int(animationRange)) : 0
-        let reverseAnimOffset = isMoving ? (animationRange - CGFloat(animationFrame * 2 % Int(animationRange))) : 0
+        let animationRange = currentTankSize * 0.06  // Smaller animation range for smoother movement
+        let animOffset = CGFloat(animationFrame * 2 % Int(animationRange))
+        let reverseAnimOffset = animationRange - animOffset
         
-        // Move the wheels based on direction, keeping them within tank bounds
+        // Animate wheels based on direction
         switch direction {
         case .up, .down:
             let yOffset = direction == .up ? reverseAnimOffset : animOffset
             for i in 0..<leftWheels.count {
                 let baseY = -halfTankHeight + CGFloat(i) * wheelDistance
-                let animatedY = baseY + (yOffset * 0.5)  // Reduce animation intensity
+                let animatedY = baseY + (yOffset * 0.3)  // Reduced intensity for smoother animation
                 // Clamp to stay within tank bounds
                 let clampedY = max(-halfTankHeight, min(halfTankHeight - wheelDistance, animatedY))
                 leftWheels[i].position.y = clampedY
                 rightWheels[i].position.y = clampedY
             }
         case .left, .right:
-            // For horizontal movement, would need to recreate wheels as horizontal
-            // Simplified for now - just keep the vertical wheels in place
-            break
+            // For horizontal movement, animate wheels vertically to simulate track rotation
+            for i in 0..<leftWheels.count {
+                let baseY = -halfTankHeight + CGFloat(i) * wheelDistance
+                // Create a subtle vertical oscillation to simulate wheel rotation
+                let rotationOffset = sin(CGFloat(animationFrame) * 0.5) * (wheelDistance * 0.1)
+                let animatedY = baseY + rotationOffset
+                let clampedY = max(-halfTankHeight, min(halfTankHeight - wheelDistance, animatedY))
+                leftWheels[i].position.y = clampedY
+                rightWheels[i].position.y = clampedY
+            }
+        }
+        
+        // Add track animation by slightly adjusting track positions
+        animateTracks()
+    }
+    
+    private func animateTracks() {
+        guard isMoving, let leftTrack = leftTrack, let rightTrack = rightTrack else { return }
+        
+        let trackAnimationOffset = CGFloat(animationFrame % 4) * 0.5 // Small offset for track movement
+        let baseLeftX = leftTrack.position.x
+        let baseRightX = rightTrack.position.x
+        
+        switch direction {
+        case .up, .down:
+            // Slight horizontal oscillation for tracks during vertical movement
+            leftTrack.position.x = baseLeftX + (direction == .up ? trackAnimationOffset : -trackAnimationOffset)
+            rightTrack.position.x = baseRightX + (direction == .up ? -trackAnimationOffset : trackAnimationOffset)
+        case .left, .right:
+            // Slight vertical oscillation for tracks during horizontal movement  
+            leftTrack.position.y = trackAnimationOffset * (direction == .left ? 1 : -1)
+            rightTrack.position.y = trackAnimationOffset * (direction == .left ? -1 : 1)
         }
     }
     

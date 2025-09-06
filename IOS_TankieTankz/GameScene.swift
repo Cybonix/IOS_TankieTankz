@@ -150,46 +150,57 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             borderNode.zPosition = 101
             hudNode.addChild(borderNode)
             
-            // Score Label
+            // Score Label (left side, top row)
             scoreLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let scoreLabel = scoreLabel {
                 scoreLabel.text = "SCORE: 0"
                 scoreLabel.fontSize = ScreenScale.scaleFont(24)
                 scoreLabel.fontColor = .yellow
-                scoreLabel.position = CGPoint(x: 20 + scoreLabel.frame.width/2, 
-                                             y: size.height - 40)
+                scoreLabel.position = CGPoint(x: 20, y: size.height - 30)
                 scoreLabel.horizontalAlignmentMode = .left
+                scoreLabel.verticalAlignmentMode = .center
                 scoreLabel.zPosition = 102
                 hudNode.addChild(scoreLabel)
             }
             
-            // Level Label
+            // Level Label (left side, bottom row)
             levelLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let levelLabel = levelLabel {
                 levelLabel.text = "LEVEL: 1"
                 levelLabel.fontSize = ScreenScale.scaleFont(24)
                 levelLabel.fontColor = .yellow
-                levelLabel.position = CGPoint(x: 20 + levelLabel.frame.width/2, 
-                                             y: size.height - 80)
+                levelLabel.position = CGPoint(x: 20, y: size.height - 70)
                 levelLabel.horizontalAlignmentMode = .left
+                levelLabel.verticalAlignmentMode = .center
                 levelLabel.zPosition = 102
                 hudNode.addChild(levelLabel)
             }
             
-            // Lives Label (hearts)
+            // Lives Label (center, top row)
             livesLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let livesLabel = livesLabel {
                 livesLabel.text = "♥♥♥" // 3 hearts
                 livesLabel.fontSize = ScreenScale.scaleFont(24)
                 livesLabel.fontColor = .red
-                livesLabel.position = CGPoint(x: size.width/2, 
-                                             y: size.height - 40)
+                livesLabel.position = CGPoint(x: size.width/2, y: size.height - 30)
                 livesLabel.horizontalAlignmentMode = .center
+                livesLabel.verticalAlignmentMode = .center
                 livesLabel.zPosition = 102
                 hudNode.addChild(livesLabel)
             }
             
-            // Health Bar Background
+            // Health Label (right side, bottom row)
+            let healthLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+            healthLabel.text = "HEALTH:"
+            healthLabel.fontSize = ScreenScale.scaleFont(22)
+            healthLabel.fontColor = .yellow
+            healthLabel.position = CGPoint(x: size.width - 20, y: size.height - 70)
+            healthLabel.horizontalAlignmentMode = .right
+            healthLabel.verticalAlignmentMode = .center
+            healthLabel.zPosition = 102
+            hudNode.addChild(healthLabel)
+            
+            // Health Bar Background (right side, top row)
             let healthBarWidth: CGFloat = ScreenScale.scale(120)
             let healthBarHeight: CGFloat = ScreenScale.scale(16)
             healthBarBackground = SKSpriteNode(color: .darkGray, 
@@ -610,32 +621,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func updateTankPosition(tank: BaseTank) {
         tank.updatePosition()
         
-        // Boundary checking
-        let tankSize: CGFloat = 50 * 1.1 + 5 // Base size * scale factor + margin
+        // Boundary checking using proper tank constants
+        let baseTankSize = tank.isPlayer ? TankConstants.PLAYER_TANK_SIZE : TankConstants.ENEMY_TANK_SIZE
+        let tankWidth = baseTankSize * 1.3  // Match the wider tank shape
+        let tankHeight = baseTankSize
+        let margin: CGFloat = 5
         let hudHeight: CGFloat = 100
         
         // Keep tank within bounds
         var position = tank.position
         
-        if position.x - tankSize/2 < 0 {
-            position.x = tankSize/2
+        if position.x - tankWidth/2 < margin {
+            position.x = tankWidth/2 + margin
             if !tank.isPlayer {
                 changeDirectionRandomly(tank: tank)
             }
-        } else if position.x + tankSize/2 > size.width {
-            position.x = size.width - tankSize/2
+        } else if position.x + tankWidth/2 > size.width - margin {
+            position.x = size.width - tankWidth/2 - margin
             if !tank.isPlayer {
                 changeDirectionRandomly(tank: tank)
             }
         }
         
-        if position.y - tankSize/2 < 0 {
-            position.y = tankSize/2
+        if position.y - tankHeight/2 < margin {
+            position.y = tankHeight/2 + margin
             if !tank.isPlayer {
                 changeDirectionRandomly(tank: tank)
             }
-        } else if position.y + tankSize/2 > size.height - hudHeight {
-            position.y = size.height - hudHeight - tankSize/2
+        } else if position.y + tankHeight/2 > size.height - hudHeight - margin {
+            position.y = size.height - hudHeight - tankHeight/2 - margin
             if !tank.isPlayer {
                 changeDirectionRandomly(tank: tank)
             }
@@ -1369,31 +1383,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func createButton(text: String, position: CGPoint) -> SKNode {
         let buttonNode = SKNode()
+        buttonNode.position = position  // Set the button node position
+        
         // Use percentage-based sizing for better touch targets
         let screenWidth = size.width
         let buttonWidth: CGFloat = screenWidth * 0.6  // 60% of screen width
         let buttonHeight: CGFloat = screenWidth * 0.12 // 12% of screen width for height
         
-        // Button background
+        // Button background (positioned at origin relative to buttonNode)
         let buttonBackground = SKSpriteNode(color: SKColor(red: 0.2, green: 0.2, blue: 0.8, alpha: 1.0), 
                                              size: CGSize(width: buttonWidth, height: buttonHeight))
-        buttonBackground.position = position
+        buttonBackground.position = CGPoint.zero
         buttonNode.addChild(buttonBackground)
         
-        // Button border
+        // Button border (positioned at origin relative to buttonNode)
         let borderRect = CGRect(x: -buttonWidth/2, y: -buttonHeight/2, width: buttonWidth, height: buttonHeight)
         let buttonBorder = SKShapeNode(rect: borderRect, cornerRadius: 0)
         buttonBorder.strokeColor = .white
         buttonBorder.lineWidth = 4
-        buttonBorder.position = position
+        buttonBorder.position = CGPoint.zero
         buttonNode.addChild(buttonBorder)
         
-        // Button text
+        // Button text (positioned at origin relative to buttonNode)
         let buttonLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         buttonLabel.text = text
         buttonLabel.fontSize = ScreenScale.scaleFont(28)
         buttonLabel.fontColor = .white
-        buttonLabel.position = position // Center on button
+        buttonLabel.position = CGPoint.zero
         buttonLabel.verticalAlignmentMode = .center
         buttonLabel.horizontalAlignmentMode = .center
         buttonNode.addChild(buttonLabel)
