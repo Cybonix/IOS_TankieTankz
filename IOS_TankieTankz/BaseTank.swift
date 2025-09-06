@@ -83,8 +83,8 @@ class BaseTank: SKSpriteNode {
         cachedTankHeight = tankSize
         cachedHalfTankWidth = cachedTankWidth / 2
         cachedHalfTankHeight = cachedTankHeight / 2
-        cachedWheelWidth = tankSize * 0.15
-        cachedWheelOffset = tankSize * 0.02  // Much closer to tank body
+        cachedWheelWidth = tankSize * 0.12   // Match the new smaller wheels
+        cachedWheelOffset = tankSize * 0.015  // Much closer to tank body - 1.5%
         
         // Create tank body wider than it is tall for better tank appearance
         let tankWidth = tankSize * 1.3  // 30% wider
@@ -152,48 +152,106 @@ class BaseTank: SKSpriteNode {
         let tankHeight = tankSize
         let halfTankWidth = tankWidth / 2
         let halfTankHeight = tankHeight / 2
-        let wheelWidth = tankSize * 0.15   // 15% of tank size
-        let wheelHeight = tankSize * 0.15  // 15% of tank size
-        let wheelOffset = tankSize * 0.02  // 2% of tank size - very close to body
+        let wheelWidth = tankSize * 0.12   // Slightly smaller for better fit
+        let wheelHeight = tankSize * 0.12  // Match width for square wheels
+        let wheelOffset = tankSize * 0.015  // Even closer to body - 1.5%
         
-        // Left track
-        leftTrack = SKShapeNode(rect: CGRect(x: -halfTankWidth - wheelOffset, y: -halfTankHeight, width: wheelWidth, height: tankHeight))
+        // Create tracks that will rotate with tank direction
+        setupRotatingTracks(tankNode: tankNode, tankWidth: tankWidth, tankHeight: tankHeight, 
+                           wheelOffset: wheelOffset, wheelWidth: wheelWidth, trackColor: trackColor)
+        
+        // Create wheels that rotate with tank direction  
+        setupRotatingWheels(tankNode: tankNode, tankWidth: tankWidth, tankHeight: tankHeight,
+                           wheelOffset: wheelOffset, wheelWidth: wheelWidth, wheelHeight: wheelHeight, wheelColor: wheelColor)
+    }
+    
+    private func setupRotatingTracks(tankNode: SKNode, tankWidth: CGFloat, tankHeight: CGFloat, 
+                                   wheelOffset: CGFloat, wheelWidth: CGFloat, trackColor: SKColor) {
+        // Create tracks based on tank orientation - always perpendicular to movement direction
+        let trackLength = max(tankWidth, tankHeight)  // Use longer dimension for track length
+        let trackWidth = wheelWidth
+        
+        // Create left track
+        leftTrack = SKShapeNode(rectOf: CGSize(width: trackWidth, height: trackLength))
         leftTrack.fillColor = trackColor
         leftTrack.strokeColor = trackColor
         tankNode.addChild(leftTrack)
         
-        // Right track
-        rightTrack = SKShapeNode(rect: CGRect(x: halfTankWidth + wheelOffset - wheelWidth, y: -halfTankHeight, width: wheelWidth, height: tankHeight))
+        // Create right track  
+        rightTrack = SKShapeNode(rectOf: CGSize(width: trackWidth, height: trackLength))
         rightTrack.fillColor = trackColor
         rightTrack.strokeColor = trackColor
         tankNode.addChild(rightTrack)
         
-        // Create wheels
-        let wheelDistance: CGFloat = tankHeight / 4  // Space wheels based on tank height
+        // Position tracks based on initial direction
+        updateTrackPositions()
+    }
+    
+    private func setupRotatingWheels(tankNode: SKNode, tankWidth: CGFloat, tankHeight: CGFloat,
+                                   wheelOffset: CGFloat, wheelWidth: CGFloat, wheelHeight: CGFloat, wheelColor: SKColor) {
+        // Create 5 wheels per side (will be repositioned based on direction)
         for i in 0..<5 {
-            let yPos = -halfTankHeight + CGFloat(i) * wheelDistance
-            
             // Left wheel
-            let leftWheel = SKShapeNode(rect: CGRect(
-                x: -halfTankWidth - wheelOffset - 2,
-                y: yPos,
-                width: wheelWidth + 4,
-                height: wheelHeight))
+            let leftWheel = SKShapeNode(rectOf: CGSize(width: wheelWidth, height: wheelHeight))
             leftWheel.fillColor = wheelColor
             leftWheel.strokeColor = wheelColor
             tankNode.addChild(leftWheel)
             leftWheels.append(leftWheel)
             
             // Right wheel
-            let rightWheel = SKShapeNode(rect: CGRect(
-                x: halfTankWidth + wheelOffset - wheelWidth - 2,
-                y: yPos,
-                width: wheelWidth + 4,
-                height: wheelHeight))
+            let rightWheel = SKShapeNode(rectOf: CGSize(width: wheelWidth, height: wheelHeight))
             rightWheel.fillColor = wheelColor
             rightWheel.strokeColor = wheelColor
             tankNode.addChild(rightWheel)
             rightWheels.append(rightWheel)
+        }
+        
+        // Position wheels based on initial direction
+        updateWheelPositions()
+    }
+    
+    private func updateTrackPositions() {
+        guard let leftTrack = leftTrack, let rightTrack = rightTrack else { return }
+        
+        let trackOffset = cachedWheelOffset + cachedWheelWidth/2
+        
+        switch direction {
+        case .up, .down:
+            // Vertical movement - tracks on left and right sides
+            leftTrack.position = CGPoint(x: -cachedHalfTankWidth - trackOffset, y: 0)
+            rightTrack.position = CGPoint(x: cachedHalfTankWidth + trackOffset, y: 0)
+            leftTrack.zRotation = 0  // Vertical orientation
+            rightTrack.zRotation = 0
+            
+        case .left, .right:
+            // Horizontal movement - tracks on top and bottom
+            leftTrack.position = CGPoint(x: 0, y: cachedHalfTankHeight + trackOffset)
+            rightTrack.position = CGPoint(x: 0, y: -cachedHalfTankHeight - trackOffset)
+            leftTrack.zRotation = CGFloat.pi / 2  // Horizontal orientation
+            rightTrack.zRotation = CGFloat.pi / 2
+        }
+    }
+    
+    private func updateWheelPositions() {
+        let wheelSpacing = max(cachedTankWidth, cachedTankHeight) / CGFloat(leftWheels.count + 1)
+        let wheelOffset = cachedWheelOffset
+        
+        switch direction {
+        case .up, .down:
+            // Wheels arranged vertically along the sides
+            for i in 0..<leftWheels.count {
+                let yPos = -cachedHalfTankHeight + CGFloat(i + 1) * wheelSpacing
+                leftWheels[i].position = CGPoint(x: -cachedHalfTankWidth - wheelOffset, y: yPos)
+                rightWheels[i].position = CGPoint(x: cachedHalfTankWidth + wheelOffset, y: yPos)
+            }
+            
+        case .left, .right:
+            // Wheels arranged horizontally along top and bottom
+            for i in 0..<leftWheels.count {
+                let xPos = -cachedHalfTankWidth + CGFloat(i + 1) * wheelSpacing
+                leftWheels[i].position = CGPoint(x: xPos, y: cachedHalfTankHeight + wheelOffset)
+                rightWheels[i].position = CGPoint(x: xPos, y: -cachedHalfTankHeight - wheelOffset)
+            }
         }
     }
     
@@ -217,6 +275,10 @@ class BaseTank: SKSpriteNode {
             tankCannon.position = CGPoint(x: cachedHalfTankWidth + cannonOffset, y: 0)
             tankCannon.zRotation = 0 // 0 degrees
         }
+        
+        // Update tracks and wheels to match new direction
+        updateTrackPositions()
+        updateWheelPositions()
     }
     
     func updatePosition() {
@@ -254,82 +316,83 @@ class BaseTank: SKSpriteNode {
     }
     
     private func updateWheelAnimation() {
-        guard isMoving, currentTankSize > 0 else { return }
+        guard isMoving, currentTankSize > 0 else { 
+            // Reset to base positions when not moving
+            updateWheelPositions()
+            return 
+        }
         
-        // Use cached values for performance
-        let wheelDistance: CGFloat = cachedTankHeight / 4  // Same as in setupTracksAndWheels
-        let animationRange = max(1, currentTankSize * 0.06)  // Ensure minimum range and prevent zero
-        let animationRangeInt = max(1, Int(animationRange))  // Ensure at least 1 to prevent division by zero
-        let animOffset = CGFloat(animationFrame * 2 % animationRangeInt)
-        let reverseAnimOffset = animationRange - animOffset
+        let animationIntensity: CGFloat = 0.3  // Reduced for smoother animation
+        let animationOffset = sin(CGFloat(animationFrame) * 0.5) * animationIntensity
         
-        // Animate wheels based on direction
+        // Animate wheels based on current direction and track layout
         switch direction {
         case .up, .down:
-            let yOffset = direction == .up ? reverseAnimOffset : animOffset
+            // Wheels along the sides - animate vertically
+            let wheelSpacing = cachedTankHeight / CGFloat(leftWheels.count + 1)
             for i in 0..<leftWheels.count {
-                let baseY = -cachedHalfTankHeight + CGFloat(i) * wheelDistance
-                let animatedY = baseY + (yOffset * 0.3)  // Reduced intensity for smoother animation
-                // Clamp to stay within tank bounds
-                let clampedY = max(-cachedHalfTankHeight, min(cachedHalfTankHeight - wheelDistance, animatedY))
-                leftWheels[i].position.y = clampedY
-                rightWheels[i].position.y = clampedY
+                let baseY = -cachedHalfTankHeight + CGFloat(i + 1) * wheelSpacing
+                let animatedY = baseY + (direction == .up ? animationOffset : -animationOffset)
+                
+                leftWheels[i].position = CGPoint(x: -cachedHalfTankWidth - cachedWheelOffset, y: animatedY)
+                rightWheels[i].position = CGPoint(x: cachedHalfTankWidth + cachedWheelOffset, y: animatedY)
             }
+            
         case .left, .right:
-            // For horizontal movement, animate wheels vertically to simulate track rotation
+            // Wheels along top/bottom - animate horizontally  
+            let wheelSpacing = cachedTankWidth / CGFloat(leftWheels.count + 1)
             for i in 0..<leftWheels.count {
-                let baseY = -cachedHalfTankHeight + CGFloat(i) * wheelDistance
-                // Create a subtle vertical oscillation to simulate wheel rotation
-                let rotationOffset = sin(CGFloat(animationFrame) * 0.5) * (wheelDistance * 0.1)
-                let animatedY = baseY + rotationOffset
-                let clampedY = max(-cachedHalfTankHeight, min(cachedHalfTankHeight - wheelDistance, animatedY))
-                leftWheels[i].position.y = clampedY
-                rightWheels[i].position.y = clampedY
+                let baseX = -cachedHalfTankWidth + CGFloat(i + 1) * wheelSpacing
+                let animatedX = baseX + (direction == .right ? animationOffset : -animationOffset)
+                
+                leftWheels[i].position = CGPoint(x: animatedX, y: cachedHalfTankHeight + cachedWheelOffset)
+                rightWheels[i].position = CGPoint(x: animatedX, y: -cachedHalfTankHeight - cachedWheelOffset)
             }
         }
         
-        // Add track animation by slightly adjusting track positions
+        // Add subtle track animation
         animateTracks()
     }
     
     private func animateTracks() {
         guard isMoving, let leftTrack = leftTrack, let rightTrack = rightTrack else { 
             // Reset track positions when not moving
-            resetTrackPositions()
+            updateTrackPositions()
             return 
         }
         
-        let trackAnimationOffset = CGFloat(animationFrame % max(4, 1)) * 0.3 // Smaller offset to prevent floating
-        
-        // Use cached dimensions for performance
-        let baseLeftX = -cachedHalfTankWidth - cachedWheelOffset
-        let baseRightX = cachedHalfTankWidth + cachedWheelOffset - cachedWheelWidth
-        let baseY = -cachedHalfTankHeight
+        let trackAnimationOffset = CGFloat(animationFrame % max(4, 1)) * 0.2 // Subtle movement
+        let trackOffset = cachedWheelOffset + cachedWheelWidth/2
         
         switch direction {
         case .up, .down:
-            // Slight horizontal oscillation for tracks during vertical movement
-            leftTrack.position.x = baseLeftX + (direction == .up ? trackAnimationOffset : -trackAnimationOffset)
-            rightTrack.position.x = baseRightX + (direction == .up ? -trackAnimationOffset : trackAnimationOffset)
-            leftTrack.position.y = baseY
-            rightTrack.position.y = baseY
+            // Tracks on sides - slight horizontal oscillation
+            let baseLeftX = -cachedHalfTankWidth - trackOffset
+            let baseRightX = cachedHalfTankWidth + trackOffset
+            
+            leftTrack.position = CGPoint(
+                x: baseLeftX + (direction == .up ? trackAnimationOffset : -trackAnimationOffset), 
+                y: 0
+            )
+            rightTrack.position = CGPoint(
+                x: baseRightX + (direction == .up ? -trackAnimationOffset : trackAnimationOffset), 
+                y: 0
+            )
+            
         case .left, .right:
-            // Reset to base horizontal positions, add slight vertical oscillation
-            leftTrack.position.x = baseLeftX
-            rightTrack.position.x = baseRightX
-            leftTrack.position.y = baseY + trackAnimationOffset * (direction == .left ? 1 : -1)
-            rightTrack.position.y = baseY + trackAnimationOffset * (direction == .left ? -1 : 1)
+            // Tracks on top/bottom - slight vertical oscillation
+            let baseTopY = cachedHalfTankHeight + trackOffset
+            let baseBottomY = -cachedHalfTankHeight - trackOffset
+            
+            leftTrack.position = CGPoint(
+                x: 0, 
+                y: baseTopY + (direction == .right ? trackAnimationOffset : -trackAnimationOffset)
+            )
+            rightTrack.position = CGPoint(
+                x: 0, 
+                y: baseBottomY + (direction == .right ? -trackAnimationOffset : trackAnimationOffset)
+            )
         }
-    }
-    
-    private func resetTrackPositions() {
-        guard let leftTrack = leftTrack, let rightTrack = rightTrack else { return }
-        
-        // Reset tracks to their base positions using cached values
-        leftTrack.position.x = -cachedHalfTankWidth - cachedWheelOffset
-        leftTrack.position.y = -cachedHalfTankHeight
-        rightTrack.position.x = cachedHalfTankWidth + cachedWheelOffset - cachedWheelWidth
-        rightTrack.position.y = -cachedHalfTankHeight
     }
     
     // MARK: - Helper Methods
@@ -382,11 +445,11 @@ class BaseTank: SKSpriteNode {
         if isPlayer {
             physicsBody?.categoryBitMask = PhysicsCategory.playerTank
             physicsBody?.contactTestBitMask = PhysicsCategory.enemyBullet | PhysicsCategory.powerUp
-            physicsBody?.collisionBitMask = PhysicsCategory.wall
+            physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.enemyTank  // Add enemy tank collision
         } else {
             physicsBody?.categoryBitMask = PhysicsCategory.enemyTank
             physicsBody?.contactTestBitMask = PhysicsCategory.playerBullet | PhysicsCategory.playerMissile
-            physicsBody?.collisionBitMask = PhysicsCategory.wall
+            physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.playerTank | PhysicsCategory.enemyTank  // Add tank collisions
         }
     }
 }

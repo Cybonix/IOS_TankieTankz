@@ -134,9 +134,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let hudNode = hudNode {
             addChild(hudNode)
             
-            // HUD background
+            // HUD background - More visible
             let hudHeight: CGFloat = 100
-            let hudBackground = SKSpriteNode(color: SKColor(red: 0.08, green: 0.08, blue: 0.16, alpha: 1.0), 
+            let hudBackground = SKSpriteNode(color: SKColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 0.9), 
                                               size: CGSize(width: size.width, height: hudHeight))
             hudBackground.position = CGPoint(x: size.width/2, y: size.height - hudHeight/2)
             hudBackground.zPosition = 100
@@ -150,63 +150,63 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             borderNode.zPosition = 101
             hudNode.addChild(borderNode)
             
-            // Score Label (left side, top row)
+            // Score Label (left side, top row) - Larger and brighter
             scoreLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let scoreLabel = scoreLabel {
                 scoreLabel.text = "SCORE: 0"
-                scoreLabel.fontSize = ScreenScale.scaleFont(24)
-                scoreLabel.fontColor = .yellow
-                scoreLabel.position = CGPoint(x: 20, y: size.height - 30)
+                scoreLabel.fontSize = ScreenScale.scaleFont(28)  // Slightly larger
+                scoreLabel.fontColor = .white  // More visible
+                scoreLabel.position = CGPoint(x: 15, y: size.height - 25)
                 scoreLabel.horizontalAlignmentMode = .left
                 scoreLabel.verticalAlignmentMode = .center
                 scoreLabel.zPosition = 102
                 hudNode.addChild(scoreLabel)
             }
             
-            // Level Label (left side, bottom row)
+            // Level Label (left side, bottom row) - Larger and brighter
             levelLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let levelLabel = levelLabel {
                 levelLabel.text = "LEVEL: 1"
-                levelLabel.fontSize = ScreenScale.scaleFont(24)
-                levelLabel.fontColor = .yellow
-                levelLabel.position = CGPoint(x: 20, y: size.height - 70)
+                levelLabel.fontSize = ScreenScale.scaleFont(28)  // Slightly larger
+                levelLabel.fontColor = .white  // More visible
+                levelLabel.position = CGPoint(x: 15, y: size.height - 75)
                 levelLabel.horizontalAlignmentMode = .left
                 levelLabel.verticalAlignmentMode = .center
                 levelLabel.zPosition = 102
                 hudNode.addChild(levelLabel)
             }
             
-            // Lives Label (center, top row)
+            // Lives Label (center, top row) - Larger hearts
             livesLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let livesLabel = livesLabel {
                 livesLabel.text = "♥♥♥" // 3 hearts
-                livesLabel.fontSize = ScreenScale.scaleFont(24)
+                livesLabel.fontSize = ScreenScale.scaleFont(32)  // Bigger hearts
                 livesLabel.fontColor = .red
-                livesLabel.position = CGPoint(x: size.width/2, y: size.height - 30)
+                livesLabel.position = CGPoint(x: size.width/2, y: size.height - 25)
                 livesLabel.horizontalAlignmentMode = .center
                 livesLabel.verticalAlignmentMode = .center
                 livesLabel.zPosition = 102
                 hudNode.addChild(livesLabel)
             }
             
-            // Health Label (right side, bottom row)
+            // Health Label (right side, bottom row) - Better visibility
             let healthLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             healthLabel.text = "HEALTH:"
-            healthLabel.fontSize = ScreenScale.scaleFont(22)
-            healthLabel.fontColor = .yellow
-            healthLabel.position = CGPoint(x: size.width - 20, y: size.height - 70)
+            healthLabel.fontSize = ScreenScale.scaleFont(26)  // Slightly larger
+            healthLabel.fontColor = .white  // More visible
+            healthLabel.position = CGPoint(x: size.width - 15, y: size.height - 75)
             healthLabel.horizontalAlignmentMode = .right
             healthLabel.verticalAlignmentMode = .center
             healthLabel.zPosition = 102
             hudNode.addChild(healthLabel)
             
-            // Health Bar Background (right side, top row)
-            let healthBarWidth: CGFloat = ScreenScale.scale(120)
-            let healthBarHeight: CGFloat = ScreenScale.scale(16)
+            // Health Bar Background (right side, top row) - Made larger
+            let healthBarWidth: CGFloat = size.width * 0.25  // 25% of screen width
+            let healthBarHeight: CGFloat = size.width * 0.04  // 4% of screen width for height
             healthBarBackground = SKSpriteNode(color: .darkGray, 
                                               size: CGSize(width: healthBarWidth, height: healthBarHeight))
             if let healthBarBackground = healthBarBackground {
-                healthBarBackground.position = CGPoint(x: size.width - 20 - healthBarWidth/2, 
+                healthBarBackground.position = CGPoint(x: size.width - 15 - healthBarWidth/2, 
                                                       y: size.height - 30)
                 healthBarBackground.zPosition = 102
                 hudNode.addChild(healthBarBackground)
@@ -1386,6 +1386,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private func createButton(text: String, position: CGPoint) -> SKNode {
         let buttonNode = SKNode()
         buttonNode.position = position  // Set the button node position
+        buttonNode.zPosition = 1000    // Ensure buttons are in front of everything
         
         // Use percentage-based sizing for better touch targets
         let screenWidth = size.width
@@ -1396,6 +1397,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let buttonBackground = SKSpriteNode(color: SKColor(red: 0.2, green: 0.2, blue: 0.8, alpha: 1.0), 
                                              size: CGSize(width: buttonWidth, height: buttonHeight))
         buttonBackground.position = CGPoint.zero
+        buttonBackground.zPosition = 1
         buttonNode.addChild(buttonBackground)
         
         // Button border (positioned at origin relative to buttonNode)
@@ -1404,6 +1406,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         buttonBorder.strokeColor = .white
         buttonBorder.lineWidth = 4
         buttonBorder.position = CGPoint.zero
+        buttonBorder.zPosition = 2
         buttonNode.addChild(buttonBorder)
         
         // Button text (positioned at origin relative to buttonNode)
@@ -1414,6 +1417,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         buttonLabel.position = CGPoint.zero
         buttonLabel.verticalAlignmentMode = .center
         buttonLabel.horizontalAlignmentMode = .center
+        buttonLabel.zPosition = 3
         buttonNode.addChild(buttonLabel)
         
         return buttonNode
