@@ -30,8 +30,12 @@ class EnemyTank: BaseTank {
         self.isDestroyed = false
         self.directionChangeTime = 0
         
-        // Call super init
+        print("🔧 EnemyTank init - About to call super.init with position: \(position), health: \(health)")
+        
+        // Call super init - this is where the crash happens
         super.init(position: position, direction: direction, health: health, isPlayer: false)
+        
+        print("✅ EnemyTank init - super.init completed successfully")
         
         // Setup boss appearance if needed
         if isBoss {
@@ -39,8 +43,10 @@ class EnemyTank: BaseTank {
             setupBossAppearance()
         }
         
-        // Setup physics body immediately
+        // Setup physics body immediately  
         setupPhysicsBody()
+        
+        print("✅ EnemyTank init - Complete!")
     }
     
     private func setupBossAppearance() {
