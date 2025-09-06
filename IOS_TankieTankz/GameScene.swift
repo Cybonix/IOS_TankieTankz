@@ -189,16 +189,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 hudNode.addChild(livesLabel)
             }
             
-            // Health Label (right side, bottom row) - Better visibility
-            let healthLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
-            healthLabel.text = "HEALTH:"
-            healthLabel.fontSize = ScreenScale.scaleFont(26)  // Slightly larger
-            healthLabel.fontColor = .white  // More visible
-            healthLabel.position = CGPoint(x: size.width - 15, y: size.height - 75)
-            healthLabel.horizontalAlignmentMode = .right
-            healthLabel.verticalAlignmentMode = .center
-            healthLabel.zPosition = 102
-            hudNode.addChild(healthLabel)
+            // Health Label removed - not necessary
             
             // Health Bar Background (right side, top row) - Made larger
             let healthBarWidth: CGFloat = size.width * 0.25  // 25% of screen width
@@ -795,7 +786,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if abs(dx) > abs(dy) {
             return dx > 0 ? .right : .left
         } else {
-            return dy > 0 ? .down : .up
+            return dy > 0 ? .up : .down  // Fixed: dy > 0 means player is above enemy, so shoot up
         }
     }
     
@@ -1754,6 +1745,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 handlePowerUpCollection(powerUp: powerUp)
             }
         }
+        
+        // Player tank collides with enemy tank - KABOOM!
+        if (contactA == PhysicsCategory.playerTank && contactB == PhysicsCategory.enemyTank) ||
+           (contactA == PhysicsCategory.enemyTank && contactB == PhysicsCategory.playerTank) {
+            
+            let playerNode = contactA == PhysicsCategory.playerTank ? contact.bodyA.node : contact.bodyB.node
+            let enemyNode = contactA == PhysicsCategory.enemyTank ? contact.bodyA.node : contact.bodyB.node
+            
+            if let player = playerNode as? BaseTank, let enemy = enemyNode as? EnemyTank {
+                handlePlayerEnemyCollision(player: player, enemy: enemy)
+            }
+        }
     }
     
     private func handleBulletHitEnemy(bullet: Bullet, enemyTank: EnemyTank) {
@@ -1878,5 +1881,38 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             missileAutoFireActive = true
             // This would be handled by missile system in full implementation
         }
+    }
+    
+    private func handlePlayerEnemyCollision(player: BaseTank, enemy: EnemyTank) {
+        // Skip collision if player has shield or invincibility
+        if shieldActive || invincibilityActive {
+            return
+        }
+        
+        // Create explosion at collision point
+        let collisionPoint = CGPoint(
+            x: (player.position.x + enemy.position.x) / 2,
+            y: (player.position.y + enemy.position.y) / 2
+        )
+        createExplosion(at: collisionPoint)
+        
+        // Play explosion sound
+        soundManager?.playSound(.explosion)
+        
+        // Destroy the enemy tank
+        enemy.removeFromParent()
+        if let index = enemyTanks.firstIndex(of: enemy) {
+            enemyTanks.remove(at: index)
+        }
+        
+        // Damage player tank significantly (or destroy immediately)
+        player.health = 0  // Instant death on collision
+        
+        // Trigger hit flash effect on player
+        player.isHit = true
+        player.hitFlashStartTime = CACurrentMediaTime()
+        
+        // Handle player death
+        handlePlayerDeath()
     }
 }

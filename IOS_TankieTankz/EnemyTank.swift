@@ -91,8 +91,8 @@ class EnemyTank: BaseTank {
         physicsBody?.affectedByGravity = false
         physicsBody?.allowsRotation = false
         physicsBody?.categoryBitMask = PhysicsCategory.enemyTank
-        physicsBody?.contactTestBitMask = PhysicsCategory.playerBullet | PhysicsCategory.playerMissile
-        physicsBody?.collisionBitMask = PhysicsCategory.wall
+        physicsBody?.contactTestBitMask = PhysicsCategory.playerBullet | PhysicsCategory.playerMissile | PhysicsCategory.playerTank
+        physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.playerTank | PhysicsCategory.enemyTank
     }
     
     func updateDirection(currentTime: TimeInterval) {
