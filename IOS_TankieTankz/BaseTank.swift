@@ -84,7 +84,7 @@ class BaseTank: SKSpriteNode {
         cachedHalfTankWidth = cachedTankWidth / 2
         cachedHalfTankHeight = cachedTankHeight / 2
         cachedWheelWidth = tankSize * 0.15
-        cachedWheelOffset = tankSize * 0.05
+        cachedWheelOffset = tankSize * 0.02  // Much closer to tank body
         
         // Create tank body wider than it is tall for better tank appearance
         let tankWidth = tankSize * 1.3  // 30% wider
@@ -154,7 +154,7 @@ class BaseTank: SKSpriteNode {
         let halfTankHeight = tankHeight / 2
         let wheelWidth = tankSize * 0.15   // 15% of tank size
         let wheelHeight = tankSize * 0.15  // 15% of tank size
-        let wheelOffset = tankSize * 0.05  // 5% of tank size - much closer to body
+        let wheelOffset = tankSize * 0.02  // 2% of tank size - very close to body
         
         // Left track
         leftTrack = SKShapeNode(rect: CGRect(x: -halfTankWidth - wheelOffset, y: -halfTankHeight, width: wheelWidth, height: tankHeight))
@@ -205,10 +205,10 @@ class BaseTank: SKSpriteNode {
         
         switch direction {
         case .up:
-            tankCannon.position = CGPoint(x: 0, y: -cachedHalfTankHeight - cannonOffset)
+            tankCannon.position = CGPoint(x: 0, y: cachedHalfTankHeight + cannonOffset)  // Above tank
             tankCannon.zRotation = CGFloat.pi / 2 // 90 degrees
         case .down:
-            tankCannon.position = CGPoint(x: 0, y: cachedHalfTankHeight + cannonOffset)
+            tankCannon.position = CGPoint(x: 0, y: -cachedHalfTankHeight - cannonOffset)  // Below tank
             tankCannon.zRotation = CGFloat.pi * 3 / 2 // 270 degrees
         case .left:
             tankCannon.position = CGPoint(x: -cachedHalfTankWidth - cannonOffset, y: 0)
