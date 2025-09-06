@@ -31,7 +31,6 @@ class GameViewController: UIViewController {
         if let view = self.view as! SKView? {
             // Get actual device screen bounds
             let screenBounds = UIScreen.main.bounds
-            let screenScale = UIScreen.main.scale
             
             // Create logical scene size based on screen points (not pixels)
             // This ensures consistent gameplay across all iPhone models

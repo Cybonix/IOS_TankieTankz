@@ -14,8 +14,6 @@ struct ScreenScale {
     // Get current screen scale factor - more aggressive scaling for modern phones
     static var scaleFactor: CGFloat {
         let screenBounds = UIScreen.main.bounds
-        let screenArea = screenBounds.width * screenBounds.height
-        
         
         // Ultra-aggressive scaling - everything needs to be much smaller for modern iPhones
         // iPhone SE (375pt) = 0.4 scale
