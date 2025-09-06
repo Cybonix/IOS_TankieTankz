@@ -1884,8 +1884,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func handlePlayerEnemyCollision(player: BaseTank, enemy: EnemyTank) {
-        // Skip collision if player has shield or invincibility
-        if shieldActive || invincibilityActive {
+        // Skip collision if player has shield
+        if shieldActive {
             return
         }
         
@@ -1912,7 +1912,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.isHit = true
         player.hitFlashStartTime = CACurrentMediaTime()
         
-        // Handle player death
-        handlePlayerDeath()
+        // Handle player death using existing game logic
+        isPlayerDestroyed = true
+        isGameEnding = true
+        gameOverDelayStartTime = CACurrentMediaTime()
+        
+        // Play player hit sound
+        soundManager?.playSound(.playerHit)
+        
+        // Update health UI
+        updateHealthUI()
     }
 }
