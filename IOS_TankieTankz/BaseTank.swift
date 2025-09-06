@@ -40,6 +40,14 @@ class BaseTank: SKSpriteNode {
     // Tank size (stored for cannon positioning)
     private var currentTankSize: CGFloat = 0
     
+    // Cached dimensions for performance
+    private var cachedTankWidth: CGFloat = 0
+    private var cachedTankHeight: CGFloat = 0
+    private var cachedHalfTankWidth: CGFloat = 0
+    private var cachedHalfTankHeight: CGFloat = 0
+    private var cachedWheelWidth: CGFloat = 0
+    private var cachedWheelOffset: CGFloat = 0
+    
     // Convenience initializer
     init(position: CGPoint, direction: Direction, health: Int, isPlayer: Bool) {
         // Initialize with a 1x1 texture that will be replaced by custom drawing
@@ -69,6 +77,14 @@ class BaseTank: SKSpriteNode {
         // Use proper tank size from constants
         let tankSize = isPlayer ? TankConstants.PLAYER_TANK_SIZE : TankConstants.ENEMY_TANK_SIZE
         currentTankSize = tankSize
+        
+        // Cache dimensions for performance
+        cachedTankWidth = tankSize * 1.3
+        cachedTankHeight = tankSize
+        cachedHalfTankWidth = cachedTankWidth / 2
+        cachedHalfTankHeight = cachedTankHeight / 2
+        cachedWheelWidth = tankSize * 0.15
+        cachedWheelOffset = tankSize * 0.05
         
         // Create tank body wider than it is tall for better tank appearance
         let tankWidth = tankSize * 1.3  // 30% wider
@@ -184,25 +200,21 @@ class BaseTank: SKSpriteNode {
     private func updateCannonPosition() {
         guard tankCannon != nil, currentTankSize > 0 else { return }
         
-        // Use the actual tank dimensions for wider tank
-        let tankWidth = currentTankSize * 1.3
-        let tankHeight = currentTankSize
-        let halfTankWidth = tankWidth / 2
-        let halfTankHeight = tankHeight / 2
+        // Use cached dimensions for performance
         let cannonOffset = currentTankSize * 0.2  // 20% of tank size
         
         switch direction {
         case .up:
-            tankCannon.position = CGPoint(x: 0, y: -halfTankHeight - cannonOffset)
+            tankCannon.position = CGPoint(x: 0, y: -cachedHalfTankHeight - cannonOffset)
             tankCannon.zRotation = CGFloat.pi / 2 // 90 degrees
         case .down:
-            tankCannon.position = CGPoint(x: 0, y: halfTankHeight + cannonOffset)
+            tankCannon.position = CGPoint(x: 0, y: cachedHalfTankHeight + cannonOffset)
             tankCannon.zRotation = CGFloat.pi * 3 / 2 // 270 degrees
         case .left:
-            tankCannon.position = CGPoint(x: -halfTankWidth - cannonOffset, y: 0)
+            tankCannon.position = CGPoint(x: -cachedHalfTankWidth - cannonOffset, y: 0)
             tankCannon.zRotation = CGFloat.pi // 180 degrees
         case .right:
-            tankCannon.position = CGPoint(x: halfTankWidth + cannonOffset, y: 0)
+            tankCannon.position = CGPoint(x: cachedHalfTankWidth + cannonOffset, y: 0)
             tankCannon.zRotation = 0 // 0 degrees
         }
     }
@@ -244,10 +256,8 @@ class BaseTank: SKSpriteNode {
     private func updateWheelAnimation() {
         guard isMoving, currentTankSize > 0 else { return }
         
-        // Use proportional values based on wider tank dimensions
-        let tankHeight = currentTankSize
-        let halfTankHeight = tankHeight / 2
-        let wheelDistance: CGFloat = tankHeight / 4  // Same as in setupTracksAndWheels
+        // Use cached values for performance
+        let wheelDistance: CGFloat = cachedTankHeight / 4  // Same as in setupTracksAndWheels
         let animationRange = max(1, currentTankSize * 0.06)  // Ensure minimum range and prevent zero
         let animationRangeInt = max(1, Int(animationRange))  // Ensure at least 1 to prevent division by zero
         let animOffset = CGFloat(animationFrame * 2 % animationRangeInt)
@@ -258,21 +268,21 @@ class BaseTank: SKSpriteNode {
         case .up, .down:
             let yOffset = direction == .up ? reverseAnimOffset : animOffset
             for i in 0..<leftWheels.count {
-                let baseY = -halfTankHeight + CGFloat(i) * wheelDistance
+                let baseY = -cachedHalfTankHeight + CGFloat(i) * wheelDistance
                 let animatedY = baseY + (yOffset * 0.3)  // Reduced intensity for smoother animation
                 // Clamp to stay within tank bounds
-                let clampedY = max(-halfTankHeight, min(halfTankHeight - wheelDistance, animatedY))
+                let clampedY = max(-cachedHalfTankHeight, min(cachedHalfTankHeight - wheelDistance, animatedY))
                 leftWheels[i].position.y = clampedY
                 rightWheels[i].position.y = clampedY
             }
         case .left, .right:
             // For horizontal movement, animate wheels vertically to simulate track rotation
             for i in 0..<leftWheels.count {
-                let baseY = -halfTankHeight + CGFloat(i) * wheelDistance
+                let baseY = -cachedHalfTankHeight + CGFloat(i) * wheelDistance
                 // Create a subtle vertical oscillation to simulate wheel rotation
                 let rotationOffset = sin(CGFloat(animationFrame) * 0.5) * (wheelDistance * 0.1)
                 let animatedY = baseY + rotationOffset
-                let clampedY = max(-halfTankHeight, min(halfTankHeight - wheelDistance, animatedY))
+                let clampedY = max(-cachedHalfTankHeight, min(cachedHalfTankHeight - wheelDistance, animatedY))
                 leftWheels[i].position.y = clampedY
                 rightWheels[i].position.y = clampedY
             }
@@ -283,22 +293,43 @@ class BaseTank: SKSpriteNode {
     }
     
     private func animateTracks() {
-        guard isMoving, let leftTrack = leftTrack, let rightTrack = rightTrack else { return }
+        guard isMoving, let leftTrack = leftTrack, let rightTrack = rightTrack else { 
+            // Reset track positions when not moving
+            resetTrackPositions()
+            return 
+        }
         
-        let trackAnimationOffset = CGFloat(animationFrame % max(4, 1)) * 0.5 // Small offset for track movement
-        let baseLeftX = leftTrack.position.x
-        let baseRightX = rightTrack.position.x
+        let trackAnimationOffset = CGFloat(animationFrame % max(4, 1)) * 0.3 // Smaller offset to prevent floating
+        
+        // Use cached dimensions for performance
+        let baseLeftX = -cachedHalfTankWidth - cachedWheelOffset
+        let baseRightX = cachedHalfTankWidth + cachedWheelOffset - cachedWheelWidth
+        let baseY = -cachedHalfTankHeight
         
         switch direction {
         case .up, .down:
             // Slight horizontal oscillation for tracks during vertical movement
             leftTrack.position.x = baseLeftX + (direction == .up ? trackAnimationOffset : -trackAnimationOffset)
             rightTrack.position.x = baseRightX + (direction == .up ? -trackAnimationOffset : trackAnimationOffset)
+            leftTrack.position.y = baseY
+            rightTrack.position.y = baseY
         case .left, .right:
-            // Slight vertical oscillation for tracks during horizontal movement  
-            leftTrack.position.y = trackAnimationOffset * (direction == .left ? 1 : -1)
-            rightTrack.position.y = trackAnimationOffset * (direction == .left ? -1 : 1)
+            // Reset to base horizontal positions, add slight vertical oscillation
+            leftTrack.position.x = baseLeftX
+            rightTrack.position.x = baseRightX
+            leftTrack.position.y = baseY + trackAnimationOffset * (direction == .left ? 1 : -1)
+            rightTrack.position.y = baseY + trackAnimationOffset * (direction == .left ? -1 : 1)
         }
+    }
+    
+    private func resetTrackPositions() {
+        guard let leftTrack = leftTrack, let rightTrack = rightTrack else { return }
+        
+        // Reset tracks to their base positions using cached values
+        leftTrack.position.x = -cachedHalfTankWidth - cachedWheelOffset
+        leftTrack.position.y = -cachedHalfTankHeight
+        rightTrack.position.x = cachedHalfTankWidth + cachedWheelOffset - cachedWheelWidth
+        rightTrack.position.y = -cachedHalfTankHeight
     }
     
     // MARK: - Helper Methods

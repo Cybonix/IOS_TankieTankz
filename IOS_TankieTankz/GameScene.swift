@@ -749,9 +749,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // Calculate direction to player
                 let directionToPlayer = calculateDirectionToPlayer(enemyPosition: enemyTank.position)
                 
-                // Create bullet
+                // Create bullet from cannon tip position
+                let bulletPosition = getBulletSpawnPosition(tank: enemyTank, direction: directionToPlayer)
                 let bullet = Bullet(
-                    position: CGPoint(x: enemyTank.position.x, y: enemyTank.position.y),
+                    position: bulletPosition,
                     direction: directionToPlayer,
                     isEnemy: true,
                     fromBoss: enemyTank.isBoss,
@@ -821,9 +822,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // Update player tank direction
             playerTank.direction = firingDirection
             
-            // Create bullet
+            // Create bullet from cannon tip position
+            let bulletPosition = getBulletSpawnPosition(tank: playerTank, direction: firingDirection)
             let bullet = Bullet(
-                position: playerTank.position,
+                position: bulletPosition,
                 direction: firingDirection,
                 isEnemy: false,
                 fromBoss: false,
@@ -1673,6 +1675,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func addBullet(_ bullet: Bullet) {
         addChild(bullet)
         bullets.append(bullet)
+    }
+    
+    // Calculate bullet spawn position at cannon tip
+    private func getBulletSpawnPosition(tank: BaseTank, direction: Direction) -> CGPoint {
+        let tankSize = tank.isPlayer ? TankConstants.PLAYER_TANK_SIZE : TankConstants.ENEMY_TANK_SIZE
+        let tankWidth = tankSize * 1.3  // Match the wider tank shape
+        let tankHeight = tankSize
+        let cannonOffset = tankSize * 0.2  // Same offset as cannon positioning
+        
+        let tankPosition = tank.position
+        
+        switch direction {
+        case .up:
+            return CGPoint(x: tankPosition.x, y: tankPosition.y + tankHeight/2 + cannonOffset)
+        case .down:
+            return CGPoint(x: tankPosition.x, y: tankPosition.y - tankHeight/2 - cannonOffset)
+        case .left:
+            return CGPoint(x: tankPosition.x - tankWidth/2 - cannonOffset, y: tankPosition.y)
+        case .right:
+            return CGPoint(x: tankPosition.x + tankWidth/2 + cannonOffset, y: tankPosition.y)
+        }
     }
     
     // MARK: - Physics Contact Delegate
