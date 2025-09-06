@@ -20,8 +20,6 @@ class BaseTank: SKSpriteNode {
     // Animation properties
     private var animationFrame: Int = 0
     private let maxAnimationFrames: Int = 4
-    private var wheelSize: CGFloat = 10.0
-    private var wheelOffset: CGFloat = 8.0
     private var isMoving: Bool = false
     private var lastPosition: CGPoint = .zero
     
@@ -38,6 +36,9 @@ class BaseTank: SKSpriteNode {
     private var leftWheels: [SKShapeNode] = []
     private var rightWheels: [SKShapeNode] = []
     
+    // Tank size (stored for cannon positioning)
+    private var currentTankSize: CGFloat = 0
+    
     // Convenience initializer
     init(position: CGPoint, direction: Direction, health: Int, isPlayer: Bool) {
         // Initialize with a 1x1 texture that will be replaced by custom drawing
@@ -50,13 +51,7 @@ class BaseTank: SKSpriteNode {
         self.isPlayer = isPlayer
         self.lastPosition = position
         
-        // Defer visual setup to ensure proper initialization order
-        DispatchQueue.main.async { [weak self] in
-            self?.setupTankVisualsDeferred()
-        }
-    }
-    
-    private func setupTankVisualsDeferred() {
+        // Setup visuals immediately (no async needed)
         setupTankVisuals()
         setupPhysicsBody()
     }
@@ -66,92 +61,101 @@ class BaseTank: SKSpriteNode {
     }
     
     private func setupTankVisuals() {
-        // Create a container node to apply scale
+        // Create a container node (NO scaling - use proper constants)
         let tankNode = SKNode()
         addChild(tankNode)
         
-        // Scale factor to match Android version
-        let tankScale: CGFloat = 1.1
-        tankNode.setScale(tankScale)
+        // Use proper tank size from constants
+        let tankSize = isPlayer ? TankConstants.PLAYER_TANK_SIZE : TankConstants.ENEMY_TANK_SIZE
+        currentTankSize = tankSize
         
-        // Create tank body (main rectangle)
-        tankBody = SKShapeNode(rectOf: CGSize(width: 50, height: 50))
+        // Create tank body using calculated size
+        tankBody = SKShapeNode(rectOf: CGSize(width: tankSize, height: tankSize))
         tankBody.fillColor = isPlayer ? .green : .red
         tankBody.strokeColor = isPlayer ? .green : .red
         tankNode.addChild(tankBody)
         
-        // Create tank cannon
-        tankCannon = SKShapeNode(rectOf: CGSize(width: 10, height: 20))
+        // Create tank cannon proportional to tank size
+        let cannonWidth = tankSize * 0.2  // 20% of tank width
+        let cannonHeight = tankSize * 0.4 // 40% of tank height
+        tankCannon = SKShapeNode(rectOf: CGSize(width: cannonWidth, height: cannonHeight))
         tankCannon.fillColor = isPlayer ? .green : .red
         tankCannon.strokeColor = isPlayer ? .green : .red
         updateCannonPosition()
         tankNode.addChild(tankCannon)
         
-        // Create tank corner details
-        let cornerSize: CGFloat = 10
+        // Create tank corner details proportional to tank size
+        let cornerSize: CGFloat = tankSize * 0.2  // 20% of tank size
+        let halfTank = tankSize / 2
         
         // Top-left corner
         let topLeftCorner = SKShapeNode(rectOf: CGSize(width: cornerSize, height: cornerSize))
         topLeftCorner.fillColor = isPlayer ? .green : .red
         topLeftCorner.strokeColor = isPlayer ? .green : .red
-        topLeftCorner.position = CGPoint(x: -25 - cornerSize/2, y: -25 - cornerSize/2)
+        topLeftCorner.position = CGPoint(x: -halfTank - cornerSize/2, y: -halfTank - cornerSize/2)
         tankNode.addChild(topLeftCorner)
         
         // Top-right corner
         let topRightCorner = SKShapeNode(rectOf: CGSize(width: cornerSize, height: cornerSize))
         topRightCorner.fillColor = isPlayer ? .green : .red
         topRightCorner.strokeColor = isPlayer ? .green : .red
-        topRightCorner.position = CGPoint(x: 25 + cornerSize/2, y: -25 - cornerSize/2)
+        topRightCorner.position = CGPoint(x: halfTank + cornerSize/2, y: -halfTank - cornerSize/2)
         tankNode.addChild(topRightCorner)
         
         // Bottom-left corner
         let bottomLeftCorner = SKShapeNode(rectOf: CGSize(width: cornerSize, height: cornerSize))
         bottomLeftCorner.fillColor = isPlayer ? .green : .red
         bottomLeftCorner.strokeColor = isPlayer ? .green : .red
-        bottomLeftCorner.position = CGPoint(x: -25 - cornerSize/2, y: 25 + cornerSize/2)
+        bottomLeftCorner.position = CGPoint(x: -halfTank - cornerSize/2, y: halfTank + cornerSize/2)
         tankNode.addChild(bottomLeftCorner)
         
         // Bottom-right corner
         let bottomRightCorner = SKShapeNode(rectOf: CGSize(width: cornerSize, height: cornerSize))
         bottomRightCorner.fillColor = isPlayer ? .green : .red
         bottomRightCorner.strokeColor = isPlayer ? .green : .red
-        bottomRightCorner.position = CGPoint(x: 25 + cornerSize/2, y: 25 + cornerSize/2)
+        bottomRightCorner.position = CGPoint(x: halfTank + cornerSize/2, y: halfTank + cornerSize/2)
         tankNode.addChild(bottomRightCorner)
         
         // Create tank tracks and wheels
-        setupTracksAndWheels(tankNode: tankNode)
+        setupTracksAndWheels(tankNode: tankNode, tankSize: tankSize)
         
         // Place the node contents at center of the sprite
         tankNode.position = .zero
     }
     
-    private func setupTracksAndWheels(tankNode: SKNode) {
+    private func setupTracksAndWheels(tankNode: SKNode, tankSize: CGFloat) {
         let trackColor = darkenColor(isPlayer ? .green : .red)
         let wheelColor = darkenColor(trackColor)
         
+        // Scale all wheel/track components to tank size
+        let halfTank = tankSize / 2
+        let wheelWidth = tankSize * 0.2    // 20% of tank size
+        let wheelHeight = tankSize * 0.2   // 20% of tank size
+        let wheelOffset = tankSize * 0.16  // 16% of tank size
+        
         // Left track
-        leftTrack = SKShapeNode(rect: CGRect(x: -25 - wheelOffset, y: -25, width: wheelSize, height: 50))
+        leftTrack = SKShapeNode(rect: CGRect(x: -halfTank - wheelOffset, y: -halfTank, width: wheelWidth, height: tankSize))
         leftTrack.fillColor = trackColor
         leftTrack.strokeColor = trackColor
         tankNode.addChild(leftTrack)
         
         // Right track
-        rightTrack = SKShapeNode(rect: CGRect(x: 25 + wheelOffset - wheelSize, y: -25, width: wheelSize, height: 50))
+        rightTrack = SKShapeNode(rect: CGRect(x: halfTank + wheelOffset - wheelWidth, y: -halfTank, width: wheelWidth, height: tankSize))
         rightTrack.fillColor = trackColor
         rightTrack.strokeColor = trackColor
         tankNode.addChild(rightTrack)
         
         // Create wheels
-        let wheelDistance: CGFloat = 13
+        let wheelDistance: CGFloat = tankSize / 4  // Space wheels based on tank size
         for i in 0..<5 {
-            let yPos = -25 + CGFloat(i) * wheelDistance
+            let yPos = -halfTank + CGFloat(i) * wheelDistance
             
             // Left wheel
             let leftWheel = SKShapeNode(rect: CGRect(
-                x: -25 - wheelOffset - 2,
+                x: -halfTank - wheelOffset - 2,
                 y: yPos,
-                width: wheelSize + 4,
-                height: wheelSize))
+                width: wheelWidth + 4,
+                height: wheelHeight))
             leftWheel.fillColor = wheelColor
             leftWheel.strokeColor = wheelColor
             tankNode.addChild(leftWheel)
@@ -159,10 +163,10 @@ class BaseTank: SKSpriteNode {
             
             // Right wheel
             let rightWheel = SKShapeNode(rect: CGRect(
-                x: 25 + wheelOffset - wheelSize - 2,
+                x: halfTank + wheelOffset - wheelWidth - 2,
                 y: yPos,
-                width: wheelSize + 4,
-                height: wheelSize))
+                width: wheelWidth + 4,
+                height: wheelHeight))
             rightWheel.fillColor = wheelColor
             rightWheel.strokeColor = wheelColor
             tankNode.addChild(rightWheel)
@@ -173,18 +177,21 @@ class BaseTank: SKSpriteNode {
     private func updateCannonPosition() {
         guard tankCannon != nil else { return }
         
+        let halfTank = currentTankSize / 2
+        let cannonOffset = currentTankSize * 0.2  // 20% of tank size
+        
         switch direction {
         case .up:
-            tankCannon.position = CGPoint(x: 0, y: -25 - 10)
+            tankCannon.position = CGPoint(x: 0, y: -halfTank - cannonOffset)
             tankCannon.zRotation = CGFloat.pi / 2 // 90 degrees
         case .down:
-            tankCannon.position = CGPoint(x: 0, y: 25 + 10)
+            tankCannon.position = CGPoint(x: 0, y: halfTank + cannonOffset)
             tankCannon.zRotation = CGFloat.pi * 3 / 2 // 270 degrees
         case .left:
-            tankCannon.position = CGPoint(x: -25 - 10, y: 0)
+            tankCannon.position = CGPoint(x: -halfTank - cannonOffset, y: 0)
             tankCannon.zRotation = CGFloat.pi // 180 degrees
         case .right:
-            tankCannon.position = CGPoint(x: 25 + 10, y: 0)
+            tankCannon.position = CGPoint(x: halfTank + cannonOffset, y: 0)
             tankCannon.zRotation = 0 // 0 degrees
         }
     }

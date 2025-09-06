@@ -33,7 +33,10 @@ class SoundManager {
     private let minTimeBetweenSounds: TimeInterval = 0.1 // 100ms between identical sounds
     
     init() {
-        setupSounds()
+        // Load sounds asynchronously to avoid blocking main thread
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.setupSounds()
+        }
     }
     
     private func setupSounds() {
