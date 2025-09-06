@@ -1090,7 +1090,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func updateLivesDisplay() {
-        let hearts = String(repeating: "♥", count: playerLives)
+        // Ensure playerLives is never negative to prevent crash
+        let safePlayerLives = max(0, playerLives)
+        let hearts = String(repeating: "♥", count: safePlayerLives)
         livesLabel?.text = hearts
     }
     
