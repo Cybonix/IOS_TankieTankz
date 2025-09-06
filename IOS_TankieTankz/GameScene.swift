@@ -1077,7 +1077,6 @@ class GameScene: SKScene {
         guard let playerTank = playerTank, let healthBar = healthBar else { return }
         
         let healthPercent = CGFloat(playerTank.health) / 100.0
-        let healthBarWidth: CGFloat = 150
         
         healthBar.xScale = healthPercent
     }
