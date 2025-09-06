@@ -2,24 +2,6 @@ import Foundation
 import SpriteKit
 import UIKit
 
-// MARK: - Physics Categories for SpriteKit
-struct PhysicsCategory {
-    static let none: UInt32 = 0
-    static let tank: UInt32 = 0x1 << 0
-    static let bullet: UInt32 = 0x1 << 1  
-    static let missile: UInt32 = 0x1 << 2
-    static let powerUp: UInt32 = 0x1 << 3
-    static let obstacle: UInt32 = 0x1 << 4
-    static let boundary: UInt32 = 0x1 << 5
-    static let player: UInt32 = 0x1 << 6
-    static let enemy: UInt32 = 0x1 << 7
-    static let playerTank: UInt32 = 0x1 << 6  // Same as player
-    static let playerBullet: UInt32 = 0x1 << 1
-    static let playerMissile: UInt32 = 0x1 << 2
-    static let enemyTank: UInt32 = 0x1 << 7  // Same as enemy
-    static let enemyBullet: UInt32 = 0x1 << 8
-    static let wall: UInt32 = 0x1 << 4  // Same as obstacle
-}
 
 // MARK: - CGVector Extensions
 extension CGVector {
@@ -172,43 +154,7 @@ struct MathUtils {
 }
 
 // MARK: - BiomeType Enum
-enum BiomeType: Int {
-    case urban = 0
-    case desert = 1  
-    case snow = 2
-    case volcanic = 3
-}
 
-// MARK: - Direction Enum (iOS equivalent of Android Direction enum)
-enum Direction: CaseIterable {
-    case up, down, left, right
-    
-    var vector: CGVector {
-        switch self {
-        case .up:
-            return CGVector(dx: 0, dy: 1)
-        case .down:
-            return CGVector(dx: 0, dy: -1)
-        case .left:
-            return CGVector(dx: -1, dy: 0)
-        case .right:
-            return CGVector(dx: 1, dy: 0)
-        }
-    }
-    
-    var angle: CGFloat {
-        switch self {
-        case .up:
-            return .pi / 2
-        case .down:
-            return -.pi / 2
-        case .left:
-            return .pi
-        case .right:
-            return 0
-        }
-    }
-}
 
 // MARK: - Boss Types (iOS equivalent)
 enum BossType: CaseIterable {

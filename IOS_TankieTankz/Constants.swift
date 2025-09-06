@@ -9,6 +9,58 @@ import Foundation
 import SpriteKit
 import UIKit
 
+// MARK: - Game Types
+
+enum Direction: CaseIterable {
+    case up, down, left, right
+    
+    var vector: CGVector {
+        switch self {
+        case .up:
+            return CGVector(dx: 0, dy: 1)
+        case .down:
+            return CGVector(dx: 0, dy: -1)
+        case .left:
+            return CGVector(dx: -1, dy: 0)
+        case .right:
+            return CGVector(dx: 1, dy: 0)
+        }
+    }
+    
+    var angle: CGFloat {
+        switch self {
+        case .up:
+            return .pi / 2
+        case .down:
+            return -.pi / 2
+        case .left:
+            return .pi
+        case .right:
+            return 0
+        }
+    }
+}
+
+enum BiomeType: Int, CaseIterable {
+    case urban = 0
+    case desert = 1
+    case snow = 2
+    case volcanic = 3
+}
+
+// MARK: - Physics Categories
+
+struct PhysicsCategory {
+    static let none: UInt32 = 0
+    static let wall: UInt32 = 0b1
+    static let playerTank: UInt32 = 0b10
+    static let enemyTank: UInt32 = 0b100
+    static let playerBullet: UInt32 = 0b1000
+    static let enemyBullet: UInt32 = 0b10000
+    static let powerUp: UInt32 = 0b100000
+    static let playerMissile: UInt32 = 0b1000000
+}
+
 // MARK: - Screen Scaling
 struct ScreenScale {
     // Get current screen scale factor - more aggressive scaling for modern phones
