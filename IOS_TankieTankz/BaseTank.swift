@@ -171,6 +171,8 @@ class BaseTank: SKSpriteNode {
     }
     
     private func updateCannonPosition() {
+        guard tankCannon != nil else { return }
+        
         switch direction {
         case .up:
             tankCannon.position = CGPoint(x: 0, y: -25 - 10)

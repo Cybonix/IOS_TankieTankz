@@ -36,6 +36,7 @@ class GameViewController: UIViewController {
             // Create logical scene size based on screen points (not pixels)
             // This ensures consistent gameplay across all iPhone models
             let sceneSize = CGSize(width: screenBounds.width, height: screenBounds.height)
+            
             let scene = GameScene(size: sceneSize)
             gameScene = scene
             

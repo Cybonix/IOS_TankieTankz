@@ -16,19 +16,15 @@ struct ScreenScale {
         let screenBounds = UIScreen.main.bounds
         let screenArea = screenBounds.width * screenBounds.height
         
-        // Debug logging
-        print("📱 Screen bounds: \(screenBounds.width) x \(screenBounds.height)")
-        print("📐 Screen area: \(screenArea)")
         
-        // Use very aggressive scaling - everything needs to be much smaller
-        // iPhone SE (375pt) = 0.7 scale (even iPhone SE objects were too big)
-        // iPhone 14 (390pt) = ~0.5 scale 
-        // iPhone Pro Max (430pt) = ~0.4 scale
-        let referenceWidth: CGFloat = 300 // Much smaller reference
+        // Ultra-aggressive scaling - everything needs to be much smaller for modern iPhones
+        // iPhone SE (375pt) = 0.4 scale
+        // iPhone 14 (390pt) = ~0.35 scale 
+        // iPhone Pro Max (430pt) = ~0.25 scale
+        let referenceWidth: CGFloat = 150 // Much smaller reference for ultra-small scaling
         let widthRatio = referenceWidth / screenBounds.width
-        let scaleFactor = max(0.3, min(0.7, widthRatio))
+        let scaleFactor = max(0.2, min(0.5, widthRatio))
         
-        print("🔧 Scale factor: \(scaleFactor)")
         return scaleFactor
     }
     
@@ -37,47 +33,49 @@ struct ScreenScale {
         return value * scaleFactor
     }
     
-    // Scale font sizes based on screen width percentage
+    // Scale font sizes based on screen width percentage - much smaller for modern iPhones
     static func scaleFont(_ fontSize: CGFloat) -> CGFloat {
         let screenWidth = UIScreen.main.bounds.width
-        // Map font sizes to percentages of screen width
+        // Map font sizes to percentages of screen width - reduced by ~40%
         let percentage: CGFloat = switch fontSize {
-        case 48: 0.08  // Large titles (Game Over, Victory) = 8% of screen width
-        case 42: 0.07  // Big text = 7% of screen width
-        case 36: 0.065 // Medium-large text = 6.5% of screen width
-        case 28: 0.055 // Medium text = 5.5% of screen width
-        case 24: 0.045 // Small text (HUD) = 4.5% of screen width
-        case 22: 0.04  // Very small text = 4% of screen width
+        case 48: 0.05  // Large titles (Game Over, Victory) = 5% of screen width (was 8%)
+        case 42: 0.045 // Big text = 4.5% of screen width (was 7%)
+        case 36: 0.04  // Medium-large text = 4% of screen width (was 6.5%)
+        case 28: 0.035 // Medium text = 3.5% of screen width (was 5.5%)
+        case 24: 0.03  // Small text (HUD) = 3% of screen width (was 4.5%)
+        case 22: 0.025 // Very small text = 2.5% of screen width (was 4%)
         default: fontSize / screenWidth // Fallback: use original as percentage
         }
         
         let scaledSize = screenWidth * percentage
-        print("🔤 Font \(fontSize)pt -> \(scaledSize)pt (\(percentage * 100)% of \(screenWidth)pt width)")
         return max(8, scaledSize) // Minimum readable size
     }
 }
 
 // MARK: - Tank Properties
 struct TankConstants {
-    // Directly specify sizes for modern phones - no more scaling calculation issues
+    // Much smaller tanks for better gameplay on modern iPhones
     static var PLAYER_TANK_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        // Tanks should be about 8% of screen width
-        return max(15, screenWidth * 0.08)
+        // Tanks should be about 4% of screen width (was 8% - too big)
+        return max(12, screenWidth * 0.04)
     }
     
     static var ENEMY_TANK_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        return max(15, screenWidth * 0.08)
+        return max(12, screenWidth * 0.04)
     }
     
     static var BOSS_TANK_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        return max(20, screenWidth * 0.12)
+        return max(15, screenWidth * 0.06)
     }
     
     static let BOSS_SCALE_FACTOR: CGFloat = 1.5
-    static var TANK_CENTER_OFFSET: CGFloat { ScreenScale.scale(25) }
+    static var TANK_CENTER_OFFSET: CGFloat { 
+        let screenWidth = UIScreen.main.bounds.width
+        return max(8, screenWidth * 0.02) // 2% of screen width
+    }
 }
 
 // MARK: - Health and Combat
@@ -95,15 +93,15 @@ struct CombatConstants {
 
 // MARK: - Weapon Properties
 struct WeaponConstants {
-    // Direct sizes based on screen width
+    // Much smaller bullets and missiles for better gameplay
     static var BULLET_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        return max(3, screenWidth * 0.015) // 1.5% of screen width
+        return max(2, screenWidth * 0.008) // 0.8% of screen width (was 1.5% - too big)
     }
     
     static var MISSILE_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        return max(4, screenWidth * 0.02) // 2% of screen width
+        return max(3, screenWidth * 0.012) // 1.2% of screen width (was 2% - too big)
     }
     
     // Speeds (don't scale these as they're movement rates)
