@@ -129,9 +129,9 @@ class BaseTank: SKSpriteNode {
         
         // Scale all wheel/track components to tank size
         let halfTank = tankSize / 2
-        let wheelWidth = tankSize * 0.2    // 20% of tank size
-        let wheelHeight = tankSize * 0.2   // 20% of tank size
-        let wheelOffset = tankSize * 0.16  // 16% of tank size
+        let wheelWidth = tankSize * 0.15   // 15% of tank size
+        let wheelHeight = tankSize * 0.15  // 15% of tank size
+        let wheelOffset = tankSize * 0.05  // 5% of tank size - much closer to body
         
         // Left track
         leftTrack = SKShapeNode(rect: CGRect(x: -halfTank - wheelOffset, y: -halfTank, width: wheelWidth, height: tankSize))

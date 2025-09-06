@@ -86,14 +86,14 @@ struct ScreenScale {
     // Scale font sizes based on screen width percentage - much smaller for modern iPhones
     static func scaleFont(_ fontSize: CGFloat) -> CGFloat {
         let screenWidth = UIScreen.main.bounds.width
-        // Map font sizes to percentages of screen width - reduced by ~40%
+        // Map font sizes to percentages of screen width - increased for better readability
         let percentage: CGFloat = switch fontSize {
-        case 48: 0.05  // Large titles (Game Over, Victory) = 5% of screen width (was 8%)
-        case 42: 0.045 // Big text = 4.5% of screen width (was 7%)
-        case 36: 0.04  // Medium-large text = 4% of screen width (was 6.5%)
-        case 28: 0.035 // Medium text = 3.5% of screen width (was 5.5%)
-        case 24: 0.03  // Small text (HUD) = 3% of screen width (was 4.5%)
-        case 22: 0.025 // Very small text = 2.5% of screen width (was 4%)
+        case 48: 0.07  // Large titles (Game Over, Victory) = 7% of screen width
+        case 42: 0.06  // Big text = 6% of screen width  
+        case 36: 0.055 // Medium-large text = 5.5% of screen width
+        case 28: 0.05  // Medium text = 5% of screen width
+        case 24: 0.045 // Small text (HUD) = 4.5% of screen width
+        case 22: 0.035 // Very small text = 3.5% of screen width
         default: fontSize / screenWidth // Fallback: use original as percentage
         }
         
@@ -104,21 +104,21 @@ struct ScreenScale {
 
 // MARK: - Tank Properties
 struct TankConstants {
-    // Much smaller tanks for better gameplay on modern iPhones
+    // Well-sized tanks for good visibility and gameplay on modern iPhones
     static var PLAYER_TANK_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        // Tanks should be about 4% of screen width (was 8% - too big)
-        return max(12, screenWidth * 0.04)
+        // Tanks should be about 5% of screen width for good visibility
+        return max(15, screenWidth * 0.05)
     }
     
     static var ENEMY_TANK_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        return max(12, screenWidth * 0.04)
+        return max(15, screenWidth * 0.05)
     }
     
     static var BOSS_TANK_SIZE: CGFloat { 
         let screenWidth = UIScreen.main.bounds.width
-        return max(15, screenWidth * 0.06)
+        return max(18, screenWidth * 0.075)
     }
     
     static let BOSS_SCALE_FACTOR: CGFloat = 1.5

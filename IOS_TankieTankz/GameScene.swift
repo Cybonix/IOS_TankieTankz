@@ -1369,8 +1369,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func createButton(text: String, position: CGPoint) -> SKNode {
         let buttonNode = SKNode()
-        let buttonWidth: CGFloat = ScreenScale.scale(240)
-        let buttonHeight: CGFloat = ScreenScale.scale(64)
+        // Use percentage-based sizing for better touch targets
+        let screenWidth = size.width
+        let buttonWidth: CGFloat = screenWidth * 0.6  // 60% of screen width
+        let buttonHeight: CGFloat = screenWidth * 0.12 // 12% of screen width for height
         
         // Button background
         let buttonBackground = SKSpriteNode(color: SKColor(red: 0.2, green: 0.2, blue: 0.8, alpha: 1.0), 
@@ -1391,7 +1393,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         buttonLabel.text = text
         buttonLabel.fontSize = ScreenScale.scaleFont(28)
         buttonLabel.fontColor = .white
-        buttonLabel.position = CGPoint(x: position.x, y: position.y - 15) // Center vertically
+        buttonLabel.position = position // Center on button
         buttonLabel.verticalAlignmentMode = .center
         buttonLabel.horizontalAlignmentMode = .center
         buttonNode.addChild(buttonLabel)
