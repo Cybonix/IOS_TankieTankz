@@ -9,8 +9,9 @@ import SpriteKit
 import Foundation
 
 class EnemyTank: BaseTank {
-    var isBoss: Bool = false
-    var bossType: BossType = .assault
+    // Remove default values to prevent double-initialization
+    let isBoss: Bool
+    let bossType: BossType
     var isDestroyed: Bool = false
     private var directionChangeTime: TimeInterval = 0
     private let directionChangeInterval: TimeInterval = 2.0
@@ -20,33 +21,30 @@ class EnemyTank: BaseTank {
         self.init(position: position, direction: direction, isBoss: isBoss, bossType: .assault)
     }
     
-    // Main initializer
+    // Main initializer - Fixed Swift initialization order
     init(position: CGPoint, direction: Direction, isBoss: Bool, bossType: BossType) {
         let health = isBoss ? CombatConstants.BOSS_MAX_HEALTH : CombatConstants.ENEMY_MAX_HEALTH
         
-        // Set instance properties before super.init
+        // CRITICAL: Set let properties before super.init (Swift requirement)
         self.isBoss = isBoss
         self.bossType = bossType
-        self.isDestroyed = false
-        self.directionChangeTime = 0
         
-        print("🔧 EnemyTank init - About to call super.init with position: \(position), health: \(health)")
-        
-        // Call super init - this is where the crash happens
+        // Call super init first - let parent initialize fully
         super.init(position: position, direction: direction, health: health, isPlayer: false)
         
-        print("✅ EnemyTank init - super.init completed successfully")
-        
-        // Setup boss appearance if needed
+        // AFTER super.init completes, setup child-specific features
+        setupEnemyFeatures()
+    }
+    
+    private func setupEnemyFeatures() {
+        // Setup boss appearance if needed (after full initialization)
         if isBoss {
             setScale(TankConstants.BOSS_SCALE_FACTOR)
             setupBossAppearance()
         }
         
-        // Setup physics body immediately  
+        // Setup physics body last (after all visual setup)
         setupPhysicsBody()
-        
-        print("✅ EnemyTank init - Complete!")
     }
     
     private func setupBossAppearance() {
@@ -73,6 +71,9 @@ class EnemyTank: BaseTank {
     }
     
     required init?(coder aDecoder: NSCoder) {
+        // Initialize let properties before super.init
+        self.isBoss = false
+        self.bossType = .assault
         super.init(coder: aDecoder)
     }
     

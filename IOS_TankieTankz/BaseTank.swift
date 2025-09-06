@@ -39,17 +39,21 @@ class BaseTank: SKSpriteNode {
         // Initialize with a 1x1 texture that will be replaced by custom drawing
         super.init(texture: nil, color: .clear, size: CGSize(width: 1, height: 1))
         
+        // Set basic properties
         self.position = position
         self.direction = direction
         self.health = health
         self.isPlayer = isPlayer
         self.lastPosition = position
         
-        // Create tank visuals
+        // Defer visual setup to ensure proper initialization order
+        DispatchQueue.main.async { [weak self] in
+            self?.setupTankVisualsDeferred()
+        }
+    }
+    
+    private func setupTankVisualsDeferred() {
         setupTankVisuals()
-        
-        // Apply physics (optional, can be implemented later)
-        // setupPhysicsBody()
     }
     
     required init?(coder aDecoder: NSCoder) {
