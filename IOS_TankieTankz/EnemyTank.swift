@@ -33,14 +33,14 @@ class EnemyTank: BaseTank {
         // Call super init
         super.init(position: position, direction: direction, health: health, isPlayer: false)
         
-        // Setup physics body
-        setupPhysicsBody()
-        
         // Setup boss appearance if needed
         if isBoss {
             setScale(TankConstants.BOSS_SCALE_FACTOR)
             setupBossAppearance()
         }
+        
+        // Setup physics body immediately
+        setupPhysicsBody()
     }
     
     private func setupBossAppearance() {
@@ -72,10 +72,11 @@ class EnemyTank: BaseTank {
     
     private func setupPhysicsBody() {
         // Create a physics body for the tank
-        let bodySize = CGSize(width: 50, height: 50)
+        let bodySize = CGSize(width: TankConstants.ENEMY_TANK_SIZE, height: TankConstants.ENEMY_TANK_SIZE)
+        let scaleFactor: CGFloat = isBoss ? TankConstants.BOSS_SCALE_FACTOR : 1.0
         let scaledSize = CGSize(
-            width: bodySize.width * (isBoss ? 1.5 : 1.0),
-            height: bodySize.height * (isBoss ? 1.5 : 1.0)
+            width: bodySize.width * scaleFactor,
+            height: bodySize.height * scaleFactor
         )
         
         physicsBody = SKPhysicsBody(rectangleOf: scaledSize)
