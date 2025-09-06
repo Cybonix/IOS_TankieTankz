@@ -25,9 +25,9 @@ class GameScene: SKScene {
     
     // Level tracking
     private var currentLevel: Int = 1
-    private let maxLevel: Int = 9
+    private let maxLevel: Int = LevelConstants.MAX_LEVELS
     private let levelsPerBoard = 3
-    private let bossLevels = [4, 8] // Levels 4 and 8 are boss levels
+    private let bossLevels = LevelConstants.BOSS_LEVELS
     
     // Track current biome for visuals and bullet coloring
     private var currentBiome: BiomeType = .urban
@@ -272,39 +272,57 @@ class GameScene: SKScene {
     }
     
     private func enemyTanksPerLevel(_ level: Int) -> Int {
-        let enemyTanksMap: [Int: Int] = [
-            1: 1, // Level 1: 1 enemy tank
-            2: 2, // Level 2: 2 enemy tanks
-            3: 3, // Level 3: 3 enemy tanks
-            4: 1, // Level 4: 1 boss tank (stronger)
-            5: 2, // Level 5: 2 enemy tanks
-            6: 3, // Level 6: 3 enemy tanks
-            7: 3, // Level 7: 3 enemy tanks
-            8: 1, // Level 8: 1 boss tank (stronger)
-            9: 3  // Level 9: 3 enemy tanks - final level
-        ]
-        
-        return enemyTanksMap[level] ?? 1
+        guard level > 0 && level < LevelConstants.ENEMIES_PER_LEVEL.count else {
+            return 1 // Default fallback
+        }
+        return LevelConstants.ENEMIES_PER_LEVEL[level]
     }
     
-    private func isBossLevel(_ level: Int) -> Bool {
+    func isBossLevel(_ level: Int) -> Bool {
         return bossLevels.contains(level)
     }
     
     private func updateBackgroundForCurrentLevel() {
-        // Update the biome type first
+        // Update the biome type based on level progression
         if bossLevels.contains(currentLevel) {
-            currentBiome = .volcanic
+            currentBiome = .volcanic  // All boss levels use volcanic
         } else if currentLevel <= 3 {
-            currentBiome = .urban
+            currentBiome = .urban     // Levels 1-3: Urban
         } else if currentLevel <= 7 {
-            currentBiome = .desert
+            currentBiome = .desert    // Levels 5-7: Desert  
+        } else if currentLevel <= 11 {
+            currentBiome = .snow      // Levels 9-11: Snow
         } else {
-            currentBiome = .snow
+            currentBiome = .volcanic  // Level 12: Final boss
         }
         
-        // Update the background
-        backgroundColor = colorForBiome(currentBiome)
+        // Set background image or color based on biome
+        setBackgroundForBiome(currentBiome)
+    }
+    
+    private func setBackgroundForBiome(_ biome: BiomeType) {
+        // Remove existing background sprite
+        childNode(withName: "background")?.removeFromParent()
+        
+        // Create background sprite with proper image
+        let backgroundTexture: String
+        switch biome {
+        case .urban:
+            backgroundTexture = "UrbanBiome"
+        case .desert:
+            backgroundTexture = "DesertBiome"
+        case .snow:
+            backgroundTexture = "SnowBiome"
+        case .volcanic:
+            backgroundTexture = "VolcanicBiome"
+        }
+        
+        let backgroundSprite = SKSpriteNode(imageNamed: backgroundTexture)
+        backgroundSprite.name = "background"
+        backgroundSprite.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        backgroundSprite.size = size
+        backgroundSprite.zPosition = -100
+        addChild(backgroundSprite)
     }
     
     private func colorForBiome(_ biome: BiomeType) -> SKColor {
@@ -339,12 +357,26 @@ class GameScene: SKScene {
         // Create appropriate tank based on level type
         let newEnemyTank: EnemyTank
         if isBossLevel {
+            // Determine boss type based on level
+            let bossType: BossType
+            switch currentLevel {
+            case 4:
+                bossType = .assault   // Level 4: Assault Boss (Blue)
+            case 8:
+                bossType = .miner     // Level 8: Miner Boss (Green)
+            case 12:
+                bossType = .laser     // Level 12: Laser Boss (Red) - Final Boss
+            default:
+                bossType = .stealth   // Fallback: Stealth Boss (Purple)
+            }
+            
             // Boss tanks spawn in the center for dramatic effect
             let bossX = isInitialSpawn ? screenWidth / 2 : randomX
             newEnemyTank = EnemyTank(
                 position: CGPoint(x: bossX, y: size.height - 150),
                 direction: .down,
-                isBoss: true
+                isBoss: true,
+                bossType: bossType
             )
         } else {
             // Regular enemy tank

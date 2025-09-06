@@ -10,36 +10,47 @@ import Foundation
 
 class EnemyTank: BaseTank {
     var isBoss: Bool = false
+    var bossType: BossType = .assault
     var isDestroyed: Bool = false
     private var directionChangeTime: TimeInterval = 0
-    private let directionChangeInterval: TimeInterval = 2.0 // Change direction every 2 seconds
+    private let directionChangeInterval: TimeInterval = 2.0
     
-    init(position: CGPoint, direction: Direction, isBoss: Bool) {
-        super.init(position: position, direction: direction, health: isBoss ? 200 : 50, isPlayer: false)
-        self.isBoss = isBoss
+    init(position: CGPoint, direction: Direction, isBoss: Bool, bossType: BossType = .assault) {
+        let health = isBoss ? CombatConstants.BOSS_MAX_HEALTH : CombatConstants.ENEMY_MAX_HEALTH
+        super.init(position: position, direction: direction, health: health, isPlayer: false)
         
-        // If it's a boss tank, make it larger and use a different color
+        self.isBoss = isBoss
+        self.bossType = bossType
+        
         if isBoss {
-            setScale(1.5) // 50% larger than regular tanks
+            setupBossAppearance()
+            setScale(TankConstants.BOSS_SCALE_FACTOR)
+        }
+        
+        setupPhysicsBody()
+    }
+    
+    private func setupBossAppearance() {
+        let bossColors = bossType.colors
+        
+        // Apply boss colors to tank components
+        for child in children {
+            if let shapeNode = child as? SKShapeNode {
+                shapeNode.fillColor = UIColor(cgColor: bossColors.primary.cgColor)
+                shapeNode.strokeColor = UIColor(cgColor: bossColors.secondary.cgColor)
+            }
             
-            // Change color to indicate it's a boss (cycle through children)
-            for child in children {
-                if let shapeNode = child as? SKShapeNode {
-                    shapeNode.fillColor = .cyan
-                    shapeNode.strokeColor = .cyan
-                }
-                
-                // If the child has its own children (like our container node)
-                for grandchild in child.children {
-                    if let shapeNode = grandchild as? SKShapeNode {
-                        shapeNode.fillColor = .cyan
-                        shapeNode.strokeColor = .cyan
-                    }
+            // Apply to nested components
+            for grandchild in child.children {
+                if let shapeNode = grandchild as? SKShapeNode {
+                    shapeNode.fillColor = UIColor(cgColor: bossColors.primary.cgColor)
+                    shapeNode.strokeColor = UIColor(cgColor: bossColors.secondary.cgColor)
                 }
             }
         }
         
-        setupPhysicsBody()
+        // Add glow effect for boss tanks
+        addGlow(color: bossColors.secondary, radius: DisplayConstants.GLOW_EFFECT_RADIUS)
     }
     
     required init?(coder aDecoder: NSCoder) {

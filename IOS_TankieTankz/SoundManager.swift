@@ -52,11 +52,12 @@ class SoundManager {
         // In a full implementation, we would replace these with actual game sounds
         
         // Create system sound effects based on frequency
-        let playerShootFreq: Float = 1000
-        let enemyShootFreq: Float = 800
-        let moveFreq: Float = 400
-        let explosionFreq: Float = 200
-        let powerUpFreq: Float = 1200
+        // Note: These frequencies would be used to generate tones in a full implementation
+        let _: Float = 1000 // playerShootFreq
+        let _: Float = 800  // enemyShootFreq
+        let _: Float = 400  // moveFreq
+        let _: Float = 200  // explosionFreq
+        let _: Float = 1200 // powerUpFreq
         
         // Create audio files or use system sounds as a fallback
         // This is just a placeholder implementation

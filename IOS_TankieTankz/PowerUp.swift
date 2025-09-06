@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import Foundation
 
 enum PowerUpType: Int, CaseIterable {
     case shieldBoost
