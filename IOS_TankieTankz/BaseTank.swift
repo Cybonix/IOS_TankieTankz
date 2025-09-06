@@ -9,7 +9,11 @@ import SpriteKit
 
 class BaseTank: SKSpriteNode {
     // Properties
-    var direction: Direction = .up
+    var direction: Direction = .up {
+        didSet {
+            updateCannonPosition()
+        }
+    }
     var health: Int = 100
     var isPlayer: Bool = false
     

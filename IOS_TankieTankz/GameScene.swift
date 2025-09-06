@@ -154,7 +154,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             scoreLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let scoreLabel = scoreLabel {
                 scoreLabel.text = "SCORE: 0"
-                scoreLabel.fontSize = 32
+                scoreLabel.fontSize = ScreenScale.scaleFont(24)
                 scoreLabel.fontColor = .yellow
                 scoreLabel.position = CGPoint(x: 20 + scoreLabel.frame.width/2, 
                                              y: size.height - 40)
@@ -167,7 +167,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             levelLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let levelLabel = levelLabel {
                 levelLabel.text = "LEVEL: 1"
-                levelLabel.fontSize = 32
+                levelLabel.fontSize = ScreenScale.scaleFont(24)
                 levelLabel.fontColor = .yellow
                 levelLabel.position = CGPoint(x: 20 + levelLabel.frame.width/2, 
                                              y: size.height - 80)
@@ -180,7 +180,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             livesLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let livesLabel = livesLabel {
                 livesLabel.text = "♥♥♥" // 3 hearts
-                livesLabel.fontSize = 32
+                livesLabel.fontSize = ScreenScale.scaleFont(24)
                 livesLabel.fontColor = .red
                 livesLabel.position = CGPoint(x: size.width/2, 
                                              y: size.height - 40)
@@ -190,8 +190,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             
             // Health Bar Background
-            let healthBarWidth: CGFloat = 150
-            let healthBarHeight: CGFloat = 20
+            let healthBarWidth: CGFloat = ScreenScale.scale(120)
+            let healthBarHeight: CGFloat = ScreenScale.scale(16)
             healthBarBackground = SKSpriteNode(color: .darkGray, 
                                               size: CGSize(width: healthBarWidth, height: healthBarHeight))
             if let healthBarBackground = healthBarBackground {
@@ -1118,7 +1118,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Game Over text
         let gameOverLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         gameOverLabel.text = "GAME OVER"
-        gameOverLabel.fontSize = 70
+        gameOverLabel.fontSize = ScreenScale.scaleFont(48)
         gameOverLabel.fontColor = .red
         gameOverLabel.position = CGPoint(x: size.width/2, y: size.height * 0.75)
         gameOverNode.addChild(gameOverLabel)
@@ -1126,21 +1126,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Score information
         let scoreLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         scoreLabel.text = "SCORE: \(score)"
-        scoreLabel.fontSize = 40
+        scoreLabel.fontSize = ScreenScale.scaleFont(28)
         scoreLabel.fontColor = .white
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height * 0.65)
         gameOverNode.addChild(scoreLabel)
         
         let levelLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         levelLabel.text = "LEVEL REACHED: \(currentLevel)"
-        levelLabel.fontSize = 40
+        levelLabel.fontSize = ScreenScale.scaleFont(28)
         levelLabel.fontColor = .white
         levelLabel.position = CGPoint(x: size.width/2, y: size.height * 0.55)
         gameOverNode.addChild(levelLabel)
         
         let tanksLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         tanksLabel.text = "TANKS DESTROYED: \(tanksDestroyed)"
-        tanksLabel.fontSize = 40
+        tanksLabel.fontSize = ScreenScale.scaleFont(28)
         tanksLabel.fontColor = .white
         tanksLabel.position = CGPoint(x: size.width/2, y: size.height * 0.45)
         gameOverNode.addChild(tanksLabel)
@@ -1171,7 +1171,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Level Complete text
         let levelCompleteLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         levelCompleteLabel.text = "LEVEL \(currentLevel) COMPLETE!"
-        levelCompleteLabel.fontSize = 70
+        levelCompleteLabel.fontSize = ScreenScale.scaleFont(48)
         levelCompleteLabel.fontColor = .green
         levelCompleteLabel.position = CGPoint(x: size.width/2, y: size.height * 0.7)
         levelCompleteNode.addChild(levelCompleteLabel)
@@ -1179,14 +1179,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Score information
         let scoreLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         scoreLabel.text = "Score: \(score)"
-        scoreLabel.fontSize = 40
+        scoreLabel.fontSize = ScreenScale.scaleFont(28)
         scoreLabel.fontColor = .white
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height * 0.6)
         levelCompleteNode.addChild(scoreLabel)
         
         let tanksLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         tanksLabel.text = "Tanks Destroyed: \(tanksDestroyed)"
-        tanksLabel.fontSize = 40
+        tanksLabel.fontSize = ScreenScale.scaleFont(28)
         tanksLabel.fontColor = .white
         tanksLabel.position = CGPoint(x: size.width/2, y: size.height * 0.5)
         levelCompleteNode.addChild(tanksLabel)
@@ -1194,7 +1194,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Next level message
         let nextLevelLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         nextLevelLabel.text = "Prepare for Level \(currentLevel + 1)..."
-        nextLevelLabel.fontSize = 40
+        nextLevelLabel.fontSize = ScreenScale.scaleFont(28)
         nextLevelLabel.fontColor = SKColor(red: 1.0, green: 0.65, blue: 0.0, alpha: 1.0) // Orange
         nextLevelLabel.position = CGPoint(x: size.width/2, y: size.height * 0.4)
         levelCompleteNode.addChild(nextLevelLabel)
@@ -1202,7 +1202,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Continue label with blinking effect
         let continueLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         continueLabel.text = "Tap anywhere to continue"
-        continueLabel.fontSize = 30
+        continueLabel.fontSize = ScreenScale.scaleFont(22)
         continueLabel.fontColor = .yellow
         continueLabel.position = CGPoint(x: size.width/2, y: size.height * 0.3)
         continueLabel.name = "continueLabel"
@@ -1219,7 +1219,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Countdown label for the first 3 seconds
         let countdownLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         countdownLabel.text = "Next level in: 3..."
-        countdownLabel.fontSize = 40
+        countdownLabel.fontSize = ScreenScale.scaleFont(28)
         countdownLabel.fontColor = .white
         countdownLabel.position = CGPoint(x: size.width/2, y: size.height * 0.2)
         countdownLabel.name = "countdownLabel"
@@ -1248,14 +1248,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Victory text
         let victoryLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         victoryLabel.text = "VICTORY!"
-        victoryLabel.fontSize = 70
+        victoryLabel.fontSize = ScreenScale.scaleFont(48)
         victoryLabel.fontColor = .yellow
         victoryLabel.position = CGPoint(x: size.width/2, y: size.height * 0.75)
         gameCompleteNode.addChild(victoryLabel)
         
         let completeLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         completeLabel.text = "ALL LEVELS COMPLETE!"
-        completeLabel.fontSize = 70
+        completeLabel.fontSize = ScreenScale.scaleFont(48)
         completeLabel.fontColor = .yellow
         completeLabel.position = CGPoint(x: size.width/2, y: size.height * 0.65)
         gameCompleteNode.addChild(completeLabel)
@@ -1263,7 +1263,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Score display
         let scoreLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         scoreLabel.text = "Final Score: \(score)"
-        scoreLabel.fontSize = 60
+        scoreLabel.fontSize = ScreenScale.scaleFont(42)
         scoreLabel.fontColor = .white
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height * 0.55)
         gameCompleteNode.addChild(scoreLabel)
@@ -1325,7 +1325,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Labels
         let destroyedLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         destroyedLabel.text = "TANK DESTROYED!"
-        destroyedLabel.fontSize = 50
+        destroyedLabel.fontSize = ScreenScale.scaleFont(36)
         destroyedLabel.fontColor = .yellow
         destroyedLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
         destroyedLabel.zPosition = 151
@@ -1333,7 +1333,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let livesLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         livesLabel.text = "LIVES REMAINING: \(playerLives)"
-        livesLabel.fontSize = 50
+        livesLabel.fontSize = ScreenScale.scaleFont(36)
         livesLabel.fontColor = .yellow
         livesLabel.position = CGPoint(x: size.width/2, y: size.height/2)
         livesLabel.zPosition = 151
@@ -1342,7 +1342,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Shadow labels for effect
         let destroyedShadow = SKLabelNode(fontNamed: "Arial-BoldMT")
         destroyedShadow.text = "TANK DESTROYED!"
-        destroyedShadow.fontSize = 50
+        destroyedShadow.fontSize = ScreenScale.scaleFont(36)
         destroyedShadow.fontColor = .black
         destroyedShadow.position = CGPoint(x: size.width/2 + 3, y: size.height/2 + 50 - 3)
         destroyedShadow.zPosition = 150.5
@@ -1350,7 +1350,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let livesShadow = SKLabelNode(fontNamed: "Arial-BoldMT")
         livesShadow.text = "LIVES REMAINING: \(playerLives)"
-        livesShadow.fontSize = 50
+        livesShadow.fontSize = ScreenScale.scaleFont(36)
         livesShadow.fontColor = .black
         livesShadow.position = CGPoint(x: size.width/2 + 3, y: size.height/2 - 3)
         livesShadow.zPosition = 150.5
@@ -1367,8 +1367,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     private func createButton(text: String, position: CGPoint) -> SKNode {
         let buttonNode = SKNode()
-        let buttonWidth: CGFloat = 300
-        let buttonHeight: CGFloat = 80
+        let buttonWidth: CGFloat = ScreenScale.scale(240)
+        let buttonHeight: CGFloat = ScreenScale.scale(64)
         
         // Button background
         let buttonBackground = SKSpriteNode(color: SKColor(red: 0.2, green: 0.2, blue: 0.8, alpha: 1.0), 
@@ -1387,7 +1387,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Button text
         let buttonLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
         buttonLabel.text = text
-        buttonLabel.fontSize = 40
+        buttonLabel.fontSize = ScreenScale.scaleFont(28)
         buttonLabel.fontColor = .white
         buttonLabel.position = CGPoint(x: position.x, y: position.y - 15) // Center vertically
         buttonLabel.verticalAlignmentMode = .center

@@ -11,31 +11,41 @@ import UIKit
 
 // MARK: - Screen Scaling
 struct ScreenScale {
-    // Base reference screen (iPhone 8 size in points)
-    static let referenceWidth: CGFloat = 375
-    static let referenceHeight: CGFloat = 667
-    
-    // Get current screen scale factor
+    // Get current screen scale factor - more aggressive scaling for modern phones
     static var scaleFactor: CGFloat {
         let screenBounds = UIScreen.main.bounds
-        let scaleX = screenBounds.width / referenceWidth
-        let scaleY = screenBounds.height / referenceHeight
-        // Use the smaller scale to ensure objects fit on screen
-        return min(scaleX, scaleY)
+        let screenArea = screenBounds.width * screenBounds.height
+        
+        // Use screen area to determine scale - modern phones have much more screen real estate
+        // iPhone SE (375x667 = 250,125) should be scale 1.0
+        // iPhone 14 (390x844 = 329,160) should be scale ~0.7-0.8 
+        // iPhone 14 Pro Max (430x932 = 400,760) should be scale ~0.6-0.7
+        let referenceArea: CGFloat = 250_000 // Base area for scaling
+        let areaRatio = referenceArea / screenArea
+        
+        // Apply scaling with reasonable bounds
+        return max(0.5, min(1.2, areaRatio))
     }
     
     // Scale a value based on current screen size
     static func scale(_ value: CGFloat) -> CGFloat {
         return value * scaleFactor
     }
+    
+    // Scale font sizes - use slightly different scaling for readability
+    static func scaleFont(_ fontSize: CGFloat) -> CGFloat {
+        // Fonts need less aggressive scaling to remain readable
+        let fontScaleFactor = max(0.6, min(1.0, scaleFactor + 0.1))
+        return fontSize * fontScaleFactor
+    }
 }
 
 // MARK: - Tank Properties
 struct TankConstants {
     // Base sizes (will be scaled for different screens)
-    static let BASE_PLAYER_TANK_SIZE: CGFloat = 35
-    static let BASE_ENEMY_TANK_SIZE: CGFloat = 35
-    static let BASE_BOSS_TANK_SIZE: CGFloat = 50
+    static let BASE_PLAYER_TANK_SIZE: CGFloat = 45
+    static let BASE_ENEMY_TANK_SIZE: CGFloat = 45
+    static let BASE_BOSS_TANK_SIZE: CGFloat = 65
     
     // Scaled sizes
     static var PLAYER_TANK_SIZE: CGFloat { ScreenScale.scale(BASE_PLAYER_TANK_SIZE) }
