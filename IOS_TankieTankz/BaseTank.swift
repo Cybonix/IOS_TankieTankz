@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import Foundation
 
 class BaseTank: SKSpriteNode {
     // Properties

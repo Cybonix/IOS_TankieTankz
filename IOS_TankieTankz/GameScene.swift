@@ -1650,8 +1650,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func exitGame() {
-        // This would normally exit to the main menu, but for now just restart
-        restartGame()
+        // Exit the application
+        // On iOS, apps should properly terminate themselves
+        DispatchQueue.main.async {
+            exit(0)
+        }
     }
     
     // MARK: - Touch Handling

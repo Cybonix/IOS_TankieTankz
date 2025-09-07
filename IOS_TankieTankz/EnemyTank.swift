@@ -18,7 +18,6 @@ class EnemyTank: BaseTank {
     
     // Health bar components
     private var healthBarContainer: SKNode!
-    private var healthBarBackground: SKShapeNode!
     private var healthBarForeground: SKShapeNode!
     private let maxHealth: Int
     
@@ -128,21 +127,13 @@ class EnemyTank: BaseTank {
         healthBarContainer = SKNode()
         addChild(healthBarContainer)
         
-        // Health bar dimensions
-        let barWidth: CGFloat = isBoss ? 60 : 40
-        let barHeight: CGFloat = 6
+        // Health bar dimensions - made smaller
+        let barWidth: CGFloat = isBoss ? 40 : 25  // Reduced from 60/40
+        let barHeight: CGFloat = 4  // Reduced from 6
         let tankSize = isBoss ? TankConstants.BOSS_TANK_SIZE : TankConstants.ENEMY_TANK_SIZE
-        let yOffset: CGFloat = tankSize * 0.7 + 15  // Position above tank
+        let yOffset: CGFloat = tankSize * 0.7 + 12  // Position above tank, slightly closer
         
-        // Background (red)
-        healthBarBackground = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight))
-        healthBarBackground.fillColor = .red
-        healthBarBackground.strokeColor = .black
-        healthBarBackground.lineWidth = 1
-        healthBarBackground.position = CGPoint(x: 0, y: yOffset)
-        healthBarContainer.addChild(healthBarBackground)
-        
-        // Foreground (green, will shrink as health decreases)
+        // Single color health bar - no background needed
         healthBarForeground = SKShapeNode(rectOf: CGSize(width: barWidth, height: barHeight))
         healthBarForeground.fillColor = .green
         healthBarForeground.strokeColor = .clear
@@ -159,22 +150,17 @@ class EnemyTank: BaseTank {
         // Calculate health percentage
         let healthPercentage = max(0, min(1, Double(health) / Double(maxHealth)))
         
-        // Update foreground bar width based on health
-        let barWidth: CGFloat = isBoss ? 60 : 40
+        // Update foreground bar width based on health - using smaller dimensions
+        let barWidth: CGFloat = isBoss ? 40 : 25  // Match setupHealthBar dimensions
+        let barHeight: CGFloat = 4
         let currentWidth = barWidth * CGFloat(healthPercentage)
         
         // Update the foreground bar size
-        let newPath = CGPath(rect: CGRect(x: -currentWidth/2, y: -3, width: currentWidth, height: 6), transform: nil)
+        let newPath = CGPath(rect: CGRect(x: -currentWidth/2, y: -barHeight/2, width: currentWidth, height: barHeight), transform: nil)
         healthBarForeground.path = newPath
         
-        // Change color based on health level
-        if healthPercentage > 0.6 {
-            healthBarForeground.fillColor = .green
-        } else if healthPercentage > 0.3 {
-            healthBarForeground.fillColor = .yellow
-        } else {
-            healthBarForeground.fillColor = .red
-        }
+        // Single color - keep green throughout
+        healthBarForeground.fillColor = .green
         
         // Hide health bar if enemy is destroyed or at full health
         let shouldShowHealthBar = health > 0 && health < maxHealth
