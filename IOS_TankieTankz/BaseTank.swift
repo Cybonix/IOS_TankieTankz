@@ -448,8 +448,8 @@ class BaseTank: SKSpriteNode {
             physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.enemyTank  // Add enemy tank collision
         } else {
             physicsBody?.categoryBitMask = PhysicsCategory.enemyTank
-            physicsBody?.contactTestBitMask = PhysicsCategory.playerBullet | PhysicsCategory.playerMissile
-            physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.playerTank | PhysicsCategory.enemyTank  // Add tank collisions
+            physicsBody?.contactTestBitMask = PhysicsCategory.playerBullet | PhysicsCategory.playerMissile | PhysicsCategory.playerTank
+            physicsBody?.collisionBitMask = PhysicsCategory.wall | PhysicsCategory.playerTank  // Only collision with wall and player tank
         }
     }
 }

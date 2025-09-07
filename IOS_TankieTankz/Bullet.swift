@@ -149,7 +149,7 @@ class Bullet: SKShapeNode {
         // Use proportional bullet speed for smoother gameplay
         let screenWidth = UIScreen.main.bounds.width
         let baseSpeed = screenWidth * 0.02  // 2% of screen width
-        let speed: CGFloat = isEnemy ? (baseSpeed * 0.7) : (baseSpeed * 1.5)  // Enemy bullets much slower, player bullets faster
+        let speed: CGFloat = isEnemy ? (baseSpeed * 0.5) : (baseSpeed * 1.5)  // Enemy bullets much slower, player bullets faster
         
         switch direction {
         case .up:
