@@ -408,13 +408,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // (This would be handled in touch events)
         
         // Process fixed timestep updates (physics, movement, game logic)
-        while accumulator >= fixedTimeStep {
+        // Add safety counter to prevent infinite loops
+        var loopCounter = 0
+        let maxLoops = 10 // Prevent more than 10 updates per frame
+        
+        while accumulator >= fixedTimeStep && loopCounter < maxLoops {
             updateGameLogic(currentTime: currentTime)
             accumulator -= fixedTimeStep
+            loopCounter += 1
+        }
+        
+        // If we hit the max loops, reset accumulator to prevent spiral
+        if loopCounter >= maxLoops {
+            accumulator = 0
         }
     }
     
     private func updateGameLogic(currentTime: TimeInterval) {
+        // Early exit if game is not running to prevent unnecessary processing
+        guard isRunning else { return }
+        
+        // Aggressive memory management - limit total objects (reduced threshold)
+        let totalObjects = bullets.count + enemyTanks.count + explosions.count + missiles.count
+        if totalObjects > 100 {
+            // Emergency cleanup
+            performEmergencyCleanup()
+        }
+        
         // Use minimal synchronization for better performance
         updateExplosions()
         
@@ -452,6 +472,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Process collisions
         battlefield?.checkCollisions()
+    }
+    
+    // MARK: - Emergency Memory Management
+    
+    private func performEmergencyCleanup() {
+        print("WARNING: Performing emergency cleanup - too many objects")
+        
+        // Remove oldest bullets first
+        let bulletsToRemove = Array(bullets.prefix(bullets.count / 2))
+        for bullet in bulletsToRemove {
+            bullet.removeFromParent()
+            if let index = bullets.firstIndex(of: bullet) {
+                bullets.remove(at: index)
+            }
+        }
+        
+        // Remove finished explosions
+        let explosionsToRemove = explosions.filter { $0.isFinished }
+        for explosion in explosionsToRemove {
+            explosion.removeFromParent()
+            if let index = explosions.firstIndex(of: explosion) {
+                explosions.remove(at: index)
+            }
+        }
+        
+        // Remove old missiles
+        let missilesToRemove = Array(missiles.prefix(missiles.count / 2))
+        for missile in missilesToRemove {
+            missile.removeFromParent()
+            if let index = missiles.firstIndex(of: missile) {
+                missiles.remove(at: index)
+            }
+        }
+        
+        print("Emergency cleanup complete - Objects remaining: \(bullets.count + enemyTanks.count + explosions.count + missiles.count)")
     }
     
     // MARK: - Update Methods
@@ -494,8 +549,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         
-        // Safety check - if we exceed bullet limit, clean up older bullets
-        if bullets.count > 100 {
+        // Safety check - if we exceed bullet limit, clean up older bullets (reduced from 100 to 50)
+        if bullets.count > 50 {
             let enemyBullets = bullets.filter { $0.isEnemy }
             let playerBullets = bullets.filter { !$0.isEnemy }
             
