@@ -154,12 +154,12 @@ struct WeaponConstants {
         return max(3, screenWidth * 0.012) // 1.2% of screen width (was 2% - too big)
     }
     
-    // Speeds (don't scale these as they're movement rates)
-    static let BULLET_SPEED: CGFloat = 12
-    static let MISSILE_SPEED: CGFloat = 8
-    static let MISSILE_MAX_LIFETIME: TimeInterval = 10.0
-    static let RAPID_FIRE_INTERVAL: TimeInterval = 0.1
-    static let NORMAL_FIRE_INTERVAL: TimeInterval = 0.3
+    // Speeds (reduced for slower, smoother gameplay)
+    static let BULLET_SPEED: CGFloat = 6  // Reduced from 12 for slower gameplay
+    static let MISSILE_SPEED: CGFloat = 4  // Reduced from 8 for slower gameplay
+    static let MISSILE_MAX_LIFETIME: TimeInterval = 15.0  // Increased to compensate for slower speed
+    static let RAPID_FIRE_INTERVAL: TimeInterval = 0.15  // Slightly slower rapid fire
+    static let NORMAL_FIRE_INTERVAL: TimeInterval = 0.5   // Slower normal firing
     static let SMOKE_INTERVAL: TimeInterval = 0.05
     static let SMOKE_PARTICLE_MAX_AGE: TimeInterval = 0.5
 }
@@ -217,4 +217,11 @@ struct iOSConstants {
     static let JOYSTICK_DEAD_ZONE: CGFloat = 0.1
     static let HAPTIC_FEEDBACK_INTENSITY: Float = 0.5
     static let FIXED_TIMESTEP: TimeInterval = 1.0 / 60.0
+}
+
+// MARK: - Performance Settings
+struct PerformanceSettings {
+    // Disable expensive visual effects for better performance on older devices
+    static let ENABLE_GLOW_EFFECTS = false  // Set to false for smoother gameplay
+    static let ENABLE_BLUR_EFFECTS = false  // Set to false for better performance
 }

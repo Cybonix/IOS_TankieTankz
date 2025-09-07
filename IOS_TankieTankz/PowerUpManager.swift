@@ -495,7 +495,7 @@ class PowerUpManager {
         // Message label
         let label = SKLabelNode(fontNamed: "Arial-BoldMT")
         label.text = text
-        label.fontSize = 40
+        label.fontSize = ScreenScale.scaleFont(24) // Much smaller, scaled font
         label.fontColor = .white
         label.position = CGPoint(x: gameScene.size.width / 2, y: gameScene.size.height / 2)
         node.addChild(label)
@@ -503,7 +503,7 @@ class PowerUpManager {
         // Shadow for better visibility
         let shadow = SKLabelNode(fontNamed: "Arial-BoldMT")
         shadow.text = text
-        shadow.fontSize = 40
+        shadow.fontSize = ScreenScale.scaleFont(24) // Much smaller, scaled font
         shadow.fontColor = .black
         shadow.position = CGPoint(x: gameScene.size.width / 2 + 2, y: gameScene.size.height / 2 - 2)
         shadow.zPosition = -1 // Behind the main text

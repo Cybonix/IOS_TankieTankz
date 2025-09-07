@@ -71,21 +71,26 @@ class PowerUp: SKNode {
     }
     
     private func setupGlowEffect() {
-        // Create an effect node for glow
-        glowNode = SKEffectNode()
-        glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10])
-        glowNode.shouldRasterize = true
-        
-        // Add a circle shape for the glow
-        let glowRadius: CGFloat = size / 2 + 10
-        let glowCircle = SKShapeNode(circleOfRadius: glowRadius)
-        glowCircle.fillColor = getTypeColor()
-        glowCircle.strokeColor = .clear
-        glowCircle.alpha = 0.6
-        glowNode.addChild(glowCircle)
-        
-        // Add glow behind other elements
-        insertChild(glowNode, at: 0)
+        // Create an effect node for glow only if performance allows
+        if PerformanceSettings.ENABLE_GLOW_EFFECTS {
+            glowNode = SKEffectNode()
+            glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10])
+            glowNode.shouldRasterize = true
+            
+            // Add a circle shape for the glow
+            let glowRadius: CGFloat = size / 2 + 10
+            let glowCircle = SKShapeNode(circleOfRadius: glowRadius)
+            glowCircle.fillColor = getTypeColor()
+            glowCircle.strokeColor = .clear
+            glowCircle.alpha = 0.6
+            glowNode.addChild(glowCircle)
+            
+            // Add glow behind other elements
+            insertChild(glowNode, at: 0)
+        } else {
+            // Create a simple node for the update method
+            glowNode = SKEffectNode()
+        }
     }
     
     private func getTypeColor() -> SKColor {

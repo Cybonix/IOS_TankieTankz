@@ -80,17 +80,19 @@ class Explosion: SKNode {
     }
     
     private func addGlowEffect() {
-        // Add glow to explosion
-        let glowNode = SKEffectNode()
-        glowNode.shouldRasterize = true
-        glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 20])
-        
-        let glowCircle = SKShapeNode(circleOfRadius: 10)
-        glowCircle.fillColor = SKColor(red: 1.0, green: 0.5, blue: 0.0, alpha: 0.7) // Orange glow
-        glowCircle.strokeColor = .clear
-        
-        glowNode.addChild(glowCircle)
-        insertChild(glowNode, at: 0) // Insert below the explosion circle
+        // Add glow to explosion only if performance allows
+        if PerformanceSettings.ENABLE_GLOW_EFFECTS {
+            let glowNode = SKEffectNode()
+            glowNode.shouldRasterize = true
+            glowNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 20])
+            
+            let glowCircle = SKShapeNode(circleOfRadius: 10)
+            glowCircle.fillColor = SKColor(red: 1.0, green: 0.5, blue: 0.0, alpha: 0.7) // Orange glow
+            glowCircle.strokeColor = .clear
+            
+            glowNode.addChild(glowCircle)
+            insertChild(glowNode, at: 0) // Insert below the explosion circle
+        }
     }
     
     func update() {

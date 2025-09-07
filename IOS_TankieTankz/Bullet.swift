@@ -119,21 +119,23 @@ class Bullet: SKShapeNode {
             glowColor = SKColor(red: 0.5, green: 0, blue: 0, alpha: 1.0)
         }
         
-        // Add glow effect
-        let glowSize: CGFloat = fromBoss ? 15 : 10
-        let effectNode = SKEffectNode()
-        effectNode.shouldRasterize = true
-        effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": glowSize])
-        
-        // Create a copy of the bullet shape for the glow
-        let glowPath = CGPath(rect: CGRect(x: -bulletSize/2, y: -bulletSize/2, width: bulletSize, height: bulletSize), transform: nil)
-        let glowShape = SKShapeNode(path: glowPath)
-        glowShape.fillColor = glowColor
-        glowShape.strokeColor = .clear
-        glowShape.alpha = 0.6
-        
-        effectNode.addChild(glowShape)
-        addChild(effectNode)
+        // Add glow effect only if performance allows
+        if PerformanceSettings.ENABLE_GLOW_EFFECTS {
+            let glowSize: CGFloat = fromBoss ? 15 : 10
+            let effectNode = SKEffectNode()
+            effectNode.shouldRasterize = true
+            effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": glowSize])
+            
+            // Create a copy of the bullet shape for the glow
+            let glowPath = CGPath(rect: CGRect(x: -bulletSize/2, y: -bulletSize/2, width: bulletSize, height: bulletSize), transform: nil)
+            let glowShape = SKShapeNode(path: glowPath)
+            glowShape.fillColor = glowColor
+            glowShape.strokeColor = .clear
+            glowShape.alpha = 0.6
+            
+            effectNode.addChild(glowShape)
+            addChild(effectNode)
+        }
     }
     
     private func setupPhysicsBody() {

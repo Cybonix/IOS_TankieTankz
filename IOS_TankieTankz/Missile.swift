@@ -11,8 +11,8 @@ import Foundation
 class Missile: SKNode {
     let targetTank: EnemyTank
     let biomeType: BiomeType
-    let missileSpeed: CGFloat = 8.0
-    private var size: CGFloat = 10.0
+    let missileSpeed: CGFloat = WeaponConstants.MISSILE_SPEED
+    private var size: CGFloat = WeaponConstants.MISSILE_SIZE
     private var angle: CGFloat = 0.0
     private var smokeTrail: [SmokeParticle] = []
     private var lastSmokeTime: TimeInterval = 0
@@ -139,55 +139,58 @@ class Missile: SKNode {
     }
     
     private func addGlowEffect() {
-        // Add glow to missile body
-        let glowColor: SKColor
-        
-        switch biomeType {
-        case .urban, .volcanic:
-            glowColor = .white
-        case .desert:
-            glowColor = SKColor(red: 0.5, green: 0, blue: 0, alpha: 1.0)
-        case .snow:
-            glowColor = SKColor(red: 0.4, green: 0, blue: 0, alpha: 1.0)
+        // Add glow effects only if performance allows
+        if PerformanceSettings.ENABLE_GLOW_EFFECTS {
+            // Add glow to missile body
+            let glowColor: SKColor
+            
+            switch biomeType {
+            case .urban, .volcanic:
+                glowColor = .white
+            case .desert:
+                glowColor = SKColor(red: 0.5, green: 0, blue: 0, alpha: 1.0)
+            case .snow:
+                glowColor = SKColor(red: 0.4, green: 0, blue: 0, alpha: 1.0)
+            }
+            
+            // Add missile body glow
+            let bodyGlow = SKEffectNode()
+            bodyGlow.shouldRasterize = true
+            bodyGlow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10])
+            
+            let glowShape = SKShapeNode(rectOf: CGSize(width: size, height: size * 3))
+            glowShape.fillColor = glowColor
+            glowShape.strokeColor = .clear
+            glowShape.alpha = 0.6
+            
+            bodyGlow.addChild(glowShape)
+            insertChild(bodyGlow, at: 0)  // Insert below the missile for glow effect
+            
+            // Add exhaust glow
+            let exhaustGlowColor: SKColor
+            
+            switch biomeType {
+            case .urban, .volcanic:
+                exhaustGlowColor = .cyan
+            case .desert:
+                exhaustGlowColor = SKColor(red: 0, green: 0, blue: 0.4, alpha: 1.0)
+            case .snow:
+                exhaustGlowColor = SKColor(red: 0, green: 0, blue: 0.3, alpha: 1.0)
+            }
+            
+            let exhaustGlow = SKEffectNode()
+            exhaustGlow.shouldRasterize = true
+            exhaustGlow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 15])
+            
+            let exhaustGlowShape = SKShapeNode(rectOf: CGSize(width: size, height: size * 2))
+            exhaustGlowShape.fillColor = exhaustGlowColor
+            exhaustGlowShape.strokeColor = .clear
+            exhaustGlowShape.alpha = 0.7
+            exhaustGlowShape.position = CGPoint(x: 0, y: size * 1.5)
+            
+            exhaustGlow.addChild(exhaustGlowShape)
+            insertChild(exhaustGlow, at: 0)
         }
-        
-        // Add missile body glow
-        let bodyGlow = SKEffectNode()
-        bodyGlow.shouldRasterize = true
-        bodyGlow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 10])
-        
-        let glowShape = SKShapeNode(rectOf: CGSize(width: size, height: size * 3))
-        glowShape.fillColor = glowColor
-        glowShape.strokeColor = .clear
-        glowShape.alpha = 0.6
-        
-        bodyGlow.addChild(glowShape)
-        insertChild(bodyGlow, at: 0)  // Insert below the missile for glow effect
-        
-        // Add exhaust glow
-        let exhaustGlowColor: SKColor
-        
-        switch biomeType {
-        case .urban, .volcanic:
-            exhaustGlowColor = .cyan
-        case .desert:
-            exhaustGlowColor = SKColor(red: 0, green: 0, blue: 0.4, alpha: 1.0)
-        case .snow:
-            exhaustGlowColor = SKColor(red: 0, green: 0, blue: 0.3, alpha: 1.0)
-        }
-        
-        let exhaustGlow = SKEffectNode()
-        exhaustGlow.shouldRasterize = true
-        exhaustGlow.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 15])
-        
-        let exhaustGlowShape = SKShapeNode(rectOf: CGSize(width: size, height: size * 2))
-        exhaustGlowShape.fillColor = exhaustGlowColor
-        exhaustGlowShape.strokeColor = .clear
-        exhaustGlowShape.alpha = 0.7
-        exhaustGlowShape.position = CGPoint(x: 0, y: size * 1.5)
-        
-        exhaustGlow.addChild(exhaustGlowShape)
-        insertChild(exhaustGlow, at: 0)
     }
     
     private func setupPhysicsBody() {
@@ -337,31 +340,34 @@ class SmokeParticle: SKShapeNode {
     }
     
     private func addGlowEffect() {
-        let glowColor: SKColor
-        
-        switch biomeType {
-        case .urban, .volcanic:
-            glowColor = .white
-        case .desert:
-            glowColor = SKColor(red: 0, green: 0, blue: 0.3, alpha: 1.0)
-        case .snow:
-            glowColor = SKColor(red: 0, green: 0, blue: 0.2, alpha: 1.0)
-        }
-        
-        // Add glow effect via SKEffectNode
-        let effectNode = SKEffectNode()
-        effectNode.shouldRasterize = true
-        effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5])
-        
-        // Create a copy of the smoke shape for the glow
-        if let smokePath = path {
-            let glowShape = SKShapeNode(path: smokePath)
-            glowShape.fillColor = glowColor
-            glowShape.strokeColor = .clear
-            glowShape.alpha = 0.6
+        // Add glow effect only if performance allows
+        if PerformanceSettings.ENABLE_GLOW_EFFECTS {
+            let glowColor: SKColor
             
-            effectNode.addChild(glowShape)
-            addChild(effectNode)
+            switch biomeType {
+            case .urban, .volcanic:
+                glowColor = .white
+            case .desert:
+                glowColor = SKColor(red: 0, green: 0, blue: 0.3, alpha: 1.0)
+            case .snow:
+                glowColor = SKColor(red: 0, green: 0, blue: 0.2, alpha: 1.0)
+            }
+            
+            // Add glow effect via SKEffectNode
+            let effectNode = SKEffectNode()
+            effectNode.shouldRasterize = true
+            effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 5])
+            
+            // Create a copy of the smoke shape for the glow
+            if let smokePath = path {
+                let glowShape = SKShapeNode(path: smokePath)
+                glowShape.fillColor = glowColor
+                glowShape.strokeColor = .clear
+                glowShape.alpha = 0.6
+                
+                effectNode.addChild(glowShape)
+                addChild(effectNode)
+            }
         }
     }
     

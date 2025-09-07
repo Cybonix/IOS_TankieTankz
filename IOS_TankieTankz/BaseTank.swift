@@ -285,8 +285,8 @@ class BaseTank: SKSpriteNode {
         // Store last position to detect movement
         lastPosition = position
         
-        // Move based on direction with smoother, proportional speed
-        let moveSpeed = max(1, currentTankSize * 0.15)  // 15% of tank size for smooth movement, minimum 1
+        // Move based on direction with slower, smoother speed
+        let moveSpeed = max(0.8, currentTankSize * 0.08)  // Reduced from 0.15 to 0.08 for slower movement
         switch direction {
         case .up:
             position.y += moveSpeed

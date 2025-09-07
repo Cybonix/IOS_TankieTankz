@@ -749,6 +749,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         for enemyTank in enemyTanks {
             updateTankPosition(tank: enemyTank)
+            enemyTank.update(currentTime: CACurrentMediaTime())  // Add hit effect updates
             
             if enemyTank.health <= 0 {
                 enemyTanksToRemove.append(enemyTank)
@@ -1088,6 +1089,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // All enemies defeated in this level
             if !isLevelComplete {
                 isLevelComplete = true
+                isRunning = false  // Stop game interactions
                 victoryStartTime = currentTime
                 
                 // Calculate player health percentage for power-up eligibility
@@ -1566,6 +1568,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Reset level flags
         isLevelComplete = false
         
+        // Resume game interactions
+        isRunning = true
+        
         // Setup the next level
         setupLevel()
     }
@@ -1986,8 +1991,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             playerLives += 1
             updateLivesDisplay()
         case .missileAutoFire:
-            missileAutoFireActive = true
-            // This would be handled by missile system in full implementation
+            activateMissileAutoFire(duration: 10.0)
         }
     }
     
