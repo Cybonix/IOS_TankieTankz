@@ -1630,29 +1630,53 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func handleGameOverScreenTouch(at location: CGPoint) {
-        if let restartButton = childNode(withName: "//restartButton") {
-            if restartButton.contains(location) {
+        // Use nodes(at:) method which is more reliable for touch detection
+        let touchedNodes = nodes(at: location)
+        
+        for node in touchedNodes {
+            // Check if this node or its parent has the button name
+            if node.name == "restartButton" || node.parent?.name == "restartButton" {
                 restartGame()
+                return
+            } else if node.name == "exitButton" || node.parent?.name == "exitButton" {
+                exitGame()
+                return
             }
         }
         
-        if let exitButton = childNode(withName: "//exitButton") {
-            if exitButton.contains(location) {
-                exitGame()
-            }
+        // Fallback: manual position-based detection
+        let restartY = size.height * 0.35
+        let exitY = size.height * 0.25
+        let buttonWidth = size.width * 0.6
+        let buttonHeight = size.width * 0.12
+        
+        // Check restart button area
+        if abs(location.y - restartY) < buttonHeight/2 && 
+           abs(location.x - size.width/2) < buttonWidth/2 {
+            restartGame()
+            return
+        }
+        
+        // Check exit button area  
+        if abs(location.y - exitY) < buttonHeight/2 && 
+           abs(location.x - size.width/2) < buttonWidth/2 {
+            exitGame()
+            return
         }
     }
     
     private func handleGameCompleteScreenTouch(at location: CGPoint) {
-        if let playAgainButton = childNode(withName: "//playAgainButton") {
-            if playAgainButton.contains(location) {
-                restartGame()
-            }
-        }
+        // Use nodes(at:) method for reliable touch detection
+        let touchedNodes = nodes(at: location)
         
-        if let exitButton = childNode(withName: "//exitButton") {
-            if exitButton.contains(location) {
+        for node in touchedNodes {
+            // Check if this node or its parent has the button name
+            if node.name == "playAgainButton" || node.parent?.name == "playAgainButton" {
+                restartGame()
+                return
+            } else if node.name == "exitButton" || node.parent?.name == "exitButton" {
                 exitGame()
+                return
             }
         }
     }
