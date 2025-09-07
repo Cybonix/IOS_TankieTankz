@@ -89,6 +89,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var lastUpdateTime: TimeInterval = 0
     private var accumulator: TimeInterval = 0
     
+    // Performance optimization - frame skipping for non-critical updates
+    private var frameCounter: Int = 0
+    
     // MARK: - Scene Setup
     
     override func didMove(to view: SKView) {
@@ -182,7 +185,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 livesLabel.text = "♥♥♥" // 3 hearts
                 livesLabel.fontSize = ScreenScale.scaleFont(40)  // Much bigger hearts
                 livesLabel.fontColor = .red
-                livesLabel.position = CGPoint(x: size.width/2, y: size.height - 25)
+                livesLabel.position = CGPoint(x: size.width/2, y: size.height - 50)  // Moved down for iPhone 14 camera/notch
                 livesLabel.horizontalAlignmentMode = .center
                 livesLabel.verticalAlignmentMode = .center
                 livesLabel.zPosition = 102
@@ -428,6 +431,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Early exit if game is not running to prevent unnecessary processing
         guard isRunning else { return }
         
+        // Increment frame counter for optimization
+        frameCounter += 1
+        
         // Aggressive memory management - limit total objects (reduced threshold)
         let totalObjects = bullets.count + enemyTanks.count + explosions.count + missiles.count
         if totalObjects > 100 {
@@ -435,42 +441,50 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             performEmergencyCleanup()
         }
         
-        // Use minimal synchronization for better performance
+        // Critical updates every frame
         updateExplosions()
+        updateBullets()
         
         // Process player actions first to prioritize responsiveness
         if !isPlayerDestroyed, let playerTank = playerTank {
             updateTankPosition(tank: playerTank)
-            powerUpManager?.update(currentTime: currentTime)
-            checkPowerUpExpiration(currentTime: currentTime)
-            powerUpManager?.checkCollisions(playerX: Int(playerTank.position.x), playerY: Int(playerTank.position.y))
+            
+            // Power-up updates only every 3rd frame for performance
+            if frameCounter % 3 == 0 {
+                powerUpManager?.update(currentTime: currentTime)
+                checkPowerUpExpiration(currentTime: currentTime)
+                powerUpManager?.checkCollisions(playerX: Int(playerTank.position.x), playerY: Int(playerTank.position.y))
+            }
         }
         
-        // Update player health UI
-        updateHealthUI()
+        // UI updates only every other frame for performance
+        if frameCounter % 2 == 0 {
+            updateHealthUI()
+        }
         
-        // Check win/lose conditions
-        checkForWinOrLoseConditions(currentTime: currentTime)
-        
-        // Update bullets every frame as they're critical for gameplay
-        updateBullets()
+        // Win/lose condition checks every 4th frame (not critical for immediate response)
+        if frameCounter % 4 == 0 {
+            checkForWinOrLoseConditions(currentTime: currentTime)
+        }
         
         // Update missiles every frame (there are typically few of these)
         updateMissiles(currentTime: currentTime)
         
-        // Always update enemy tank positions every frame for smooth movement
+        // Enemy tank position updates every frame for smooth movement
         updateEnemyTankPositions()
         
-        // Handle enemy firing with throttling
-        updateEnemyTankFiring(currentTime: currentTime)
+        // Enemy firing only every other frame for performance
+        if frameCounter % 2 == 0 {
+            updateEnemyTankFiring(currentTime: currentTime)
+        }
         
-        // Check if we should fire missiles
+        // Missile auto-fire check
         if missileAutoFireActive && !isPlayerDestroyed && currentTime - lastMissileFiredTime >= missileFireInterval {
             fireMissile()
             lastMissileFiredTime = currentTime
         }
         
-        // Process collisions
+        // Collision processing every frame (critical)
         battlefield?.checkCollisions()
     }
     
@@ -1169,14 +1183,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - UI Screens
     
     private func showGameOverScreen() {
+        // Stop all game processing
+        isRunning = false
+        
         let gameOverNode = SKNode()
-        gameOverNode.zPosition = 200
+        gameOverNode.name = "gameOverScreen"
+        gameOverNode.zPosition = 1000  // Much higher z-position to ensure it's on top
         addChild(gameOverNode)
         
-        // Semi-transparent overlay
-        let overlay = SKSpriteNode(color: .black, size: size)
+        // Semi-transparent overlay - make it fully cover the screen and interactive
+        let overlay = SKSpriteNode(color: .black, size: CGSize(width: size.width + 100, height: size.height + 100))
         overlay.alpha = 0.7
         overlay.position = CGPoint(x: size.width/2, y: size.height/2)
+        overlay.name = "gameOverOverlay"
+        overlay.zPosition = 1001
         gameOverNode.addChild(overlay)
         
         // Game Over text
@@ -1551,6 +1571,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func restartGame() {
+        // Remove game over screen if it exists
+        childNode(withName: "gameOverScreen")?.removeFromParent()
+        
         // Reset game state
         isGameOver = false
         isPlayerDestroyed = false
@@ -1637,19 +1660,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Record touch start position
         touchStartPosition = location
         
-        // Check if we're touching any buttons on game over screen
+        // Priority 1: Check if game over screen exists (most reliable check)
+        if childNode(withName: "gameOverScreen") != nil {
+            handleGameOverScreenTouch(at: location)
+            return
+        }
+        
+        // Priority 2: Check if we're touching any buttons on game over screen
         if isGameOver {
             handleGameOverScreenTouch(at: location)
             return
         }
         
-        // Check if we're touching any buttons on game complete screen
+        // Priority 3: Check if we're touching any buttons on game complete screen
         if isGameComplete {
             handleGameCompleteScreenTouch(at: location)
             return
         }
         
-        // Check if level complete screen is active
+        // Priority 4: Check if level complete screen is active
         if isLevelComplete {
             let currentTime = CACurrentMediaTime()
             if currentTime - victoryStartTime >= levelCompletionDelay {
@@ -1658,8 +1687,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         
-        // Normal gameplay touch handling
-        if !isPlayerDestroyed && !isGameEnding {
+        // Priority 5: Normal gameplay touch handling (only if game is running)
+        if isRunning && !isPlayerDestroyed && !isGameEnding {
             handlePlayerFiring(at: location, currentTime: CACurrentMediaTime())
         }
     }
