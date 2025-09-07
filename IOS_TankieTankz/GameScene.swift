@@ -180,7 +180,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             livesLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
             if let livesLabel = livesLabel {
                 livesLabel.text = "♥♥♥" // 3 hearts
-                livesLabel.fontSize = ScreenScale.scaleFont(32)  // Bigger hearts
+                livesLabel.fontSize = ScreenScale.scaleFont(40)  // Much bigger hearts
                 livesLabel.fontColor = .red
                 livesLabel.position = CGPoint(x: size.width/2, y: size.height - 25)
                 livesLabel.horizontalAlignmentMode = .center
